@@ -37,17 +37,24 @@ class ODLAutoloadFlow(object):
     def execute_flow(self):
 
         self._set_controller_details()
+        # ports used in connections between switches
+        used_ports = []
+        topo = self._odl_client.get_topology()
+
+        for link in topo["link"]:
+            used_ports.append(link["source"]["source-tp"])
+            used_ports.append(link["destination"]["dest-tp"])
 
         for switch_id in self._odl_client.get_leaf_switches():
             sw_resource = OpenVSwitchChassis(shell_name="",
-                                             name="Chassis {}".format(switch_id.replace(":", "-")),
+                                             name="Switch {}".format(switch_id.replace(":", "-")),
                                              unique_id="{}".format(switch_id.split(":")[-1]))
 
             switch = self._odl_client.get_switch(switch_id)
             sw_ = switch_id.split(":")[-1]
             self._resource.add_sub_resource(sw_, sw_resource)
 
-            for port in switch["node-connector"]:
+            for port in [port for port in switch["node-connector"] if port["id"] not in used_ports]:
                 port_name = port["flow-node-inventory:name"]
 
                 # ignore loopback interface
