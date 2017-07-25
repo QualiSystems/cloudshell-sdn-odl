@@ -43,6 +43,13 @@ class ODLAutoloadFlow(object):
 
             for port in switch["node-connector"]:
                 port_name = port["flow-node-inventory:name"]
+
+                # ignore loopback interface
+                if "local" in port["id"].lower():
+                    continue
+
+                # todo: delete port which is connected to another switch
+
                 port_no = port["flow-node-inventory:port-number"]
                 mac_addr = port["flow-node-inventory:hardware-address"]
                 unique_id = "{}.{}".format(sw_, port_no)
