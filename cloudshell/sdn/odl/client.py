@@ -1,5 +1,4 @@
 from collections import defaultdict
-import json
 
 import networkx as nx
 import requests
@@ -45,16 +44,22 @@ class ODLClient(object):
         topo = self.get_topology()
 
         for node in topo.get("node", []):
-            graph.add_node(node["node-id"])
+            if 'opendaylight-topology-inventory:inventory-node-ref' in node:
+                graph.add_node(node["node-id"])
 
         for link in topo.get("link", []):
             src = link["source"]
             dst = link["destination"]
 
-            graph.add_edge(src["source-node"], dst["dest-node"], attr_dict={
-                "src_tp": src["source-tp"],
-                "dst_tp": dst["dest-tp"]
-            })
+            if src["source-node"] in graph.nodes() and dst["dest-node"] in graph.nodes():
+                graph.add_edge(src["source-node"], dst["dest-node"], attr_dict={
+                    "src_tp": src["source-tp"],
+                    "dst_tp": dst["dest-tp"]
+                })
+                graph.add_edge(dst["dest-node"], src["source-node"], attr_dict={
+                    "src_tp": dst["dest-tp"],
+                    "dst_tp": src["source-tp"]
+                })
 
         return graph
 
@@ -102,36 +107,97 @@ class ODLClient(object):
             rules[src_sw]["port_out"] = int(data["src_tp"].split(":")[-1])
             rules[dst_sw]["port_in"] = int(data["dst_tp"].split(":")[-1])
 
-        # return rules
-        # return rules
-        xx = []
+        route = []
         for key, items in rules.iteritems():
             items["switch"] = key
-            xx.append(items)
-        return xx
+            route.append(items)
 
-    def create_route(self, src_switch, src_port, dst_switch, dst_port):
-        route = self.calculate_route(src_switch, src_port, dst_switch, dst_port)
-        # data = {
-        #     "route": "sffs", #json.dumps(route),
-        #     "switch": src_switch,
-        #     "port": src_port
-        # }
+        return route
+
+    def create_route(self, scr_mac, dst_mac, src_switch, src_port, dst_switch, dst_port):
+        """Create route
+            {
+                "cloudshell:input": {
+                    "src_mac": "src_mac",
+                    "dst_mac": "dst_mac",
+                    "allow": "true",
+                    "route": [
+                        {
+                            "port_in": "1",
+                            "port_out": "2",
+                            "switch": "openflow:1"
+                        }
+                    ]
+                }
+            }
+
+        :param src_switch:
+        :param src_port:
+        :param dst_switch:
+        :param dst_port:
+        :return:
+        """
+        rules = self.calculate_route(src_switch, src_port, dst_switch, dst_port)
         data = {
             "cloudshell:input": {
-                "route": json.dumps(route),
-                "switch": src_switch,
-                "port": src_port
+                "src_mac": scr_mac,
+                "dst_mac": dst_mac,
+                "allow": True,
+                "route": rules
             }
         }
         self._do_post(path="restconf/operations/cloudshell:create-route", json=data)
 
-    def delete_route(self):
-        pass
+    def delete_route(self, scr_mac, dst_mac, src_switch, src_port, dst_switch, dst_port):
+        """Delete route
+            {
+                "cloudshell:input": {
+                    "src_mac": "src_mac",
+                    "dst_mac": "dst_mac",
+                    "allow": "false",
+                    "route": [
+                        {
+                            "port_in": "1",
+                            "port_out": "2",
+                            "switch": "openflow:1"
+                        }
+                    ]
+                }
+            }
+
+        :param src_switch:
+        :param src_port:
+        :param dst_switch:
+        :param dst_port:
+        :return:
+        """
+        rules = self.calculate_route(src_switch, src_port, dst_switch, dst_port)
+        data = {
+            "cloudshell:input": {
+                "src_mac": scr_mac,
+                "dst_mac": dst_mac,
+                "allow": False,
+                "route": rules
+            }
+        }
+        self._do_post(path="restconf/operations/cloudshell:create-route", json=data)
 
 
 if __name__ == "__main__":
     cli = ODLClient(address="localhost", username="admin", password="admin")
-    cli.get_leaf_switches()
-    print cli.create_route(src_switch="openflow:1", src_port="1", dst_switch="openflow:3", dst_port="1")
-    # sw = cli.get_switch("openflow:1")
+
+    print cli.get_leaf_switches()
+
+    print cli.create_route(scr_mac="00:00:00:00:00:01",
+                           dst_mac="00:00:00:00:00:04",
+                           src_switch="openflow:2",
+                           src_port="1",
+                           dst_switch="openflow:3",
+                           dst_port="2")
+    #
+    # print cli.delete_route(scr_mac="00:00:00:00:00:01",
+    #                        dst_mac="00:00:00:00:00:04",
+    #                        src_switch="openflow:2",
+    #                        src_port="1",
+    #                        dst_switch="openflow:3",
+    #                        dst_port="2")
