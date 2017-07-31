@@ -40,10 +40,14 @@ class ODLAutoloadFlow(object):
         # ports used in connections between switches
         used_ports = []
         topo = self._odl_client.get_topology()
+        switch_ids = self._odl_client.get_switches()
 
-        for link in topo["link"]:
-            used_ports.append(link["source"]["source-tp"])
-            used_ports.append(link["destination"]["dest-tp"])
+        for link in topo.get("link", []):
+            tp = link["destination"]["dest-node"]
+            op = link["source"]["source-node"]
+            if tp in switch_ids and op in switch_ids:
+                used_ports.append(link["source"]["source-tp"])
+                used_ports.append(link["destination"]["dest-tp"])
 
         for switch_id in self._odl_client.get_leaf_switches():
             sw_resource = OpenVSwitchChassis(shell_name="",
@@ -54,15 +58,23 @@ class ODLAutoloadFlow(object):
             sw_ = switch_id.split(":")[-1]
             self._resource.add_sub_resource(sw_, sw_resource)
 
-            for port in [port for port in switch["node-connector"] if port["id"] not in used_ports]:
-                port_name = port["flow-node-inventory:name"]
+            for port in [port for port in switch["node-connector"]
+                         if port["id"] not in used_ports
+                         # ignore loopback interface
+                         and "local" not in port["id"].lower()]:
 
-                # ignore loopback interface
-                if "local" in port["id"].lower():
-                    continue
+                try:
+                    port_name = port["flow-node-inventory:name"]
+                except KeyError:
+                    port_name = port["id"]
 
-                port_no = port["flow-node-inventory:port-number"]
-                mac_addr = port["flow-node-inventory:hardware-address"]
+                try:
+                    port_no = port["flow-node-inventory:port-number"]
+                except KeyError:
+                    # todo: for some ports the is no flow-node-inventory:port-number attr
+                    port_no = port["id"].split(":")[-1]
+
+                mac_addr = port.get("flow-node-inventory:hardware-address")
                 unique_id = "{}.{}".format(sw_, port_no)
 
                 port_object = GenericPort(shell_name="",
@@ -79,7 +91,6 @@ class ODLAutoloadFlow(object):
                 port_object.duplex = ""
                 port_object.auto_negotiation = ""
                 port_object.adjacent = ""
-
                 sw_resource.add_sub_resource(port_no, port_object)
                 # 'module_model': '',
                 # 'version': '',
@@ -103,7 +114,6 @@ class ODLAutoloadFlow(object):
         :param autoload_details:
         :return:
         """
-
         self._logger.debug("-------------------- <RESOURCES> ----------------------")
         for resource in autoload_details.resources:
             self._logger.debug(

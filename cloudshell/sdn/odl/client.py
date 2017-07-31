@@ -72,6 +72,14 @@ class ODLClient(object):
         # leaf switches will have only one outgoing link or will haven't links at all
         return [node for node, out_links_count in graph.out_degree().items() if out_links_count <= 1]
 
+    def get_switches(self):
+        """Return leaf switches
+
+        :rtype: list[str]
+        """
+        graph = self.get_graph()
+        return graph.nodes()
+
     # def calculate_route(self, src_sw, dst_sw):
         # route = []
         # graph = self.get_graph()
@@ -186,14 +194,14 @@ class ODLClient(object):
 if __name__ == "__main__":
     cli = ODLClient(address="localhost", username="admin", password="admin")
 
-    print cli.get_leaf_switches()
-
-    print cli.create_route(scr_mac="00:00:00:00:00:01",
-                           dst_mac="00:00:00:00:00:04",
-                           src_switch="openflow:2",
-                           src_port="1",
-                           dst_switch="openflow:3",
-                           dst_port="2")
+    # print cli.get_leaf_switches()
+    #
+    # print cli.create_route(scr_mac="00:00:00:00:00:01",
+    #                        dst_mac="00:00:00:00:00:04",
+    #                        src_switch="openflow:2",
+    #                        src_port="1",
+    #                        dst_switch="openflow:3",
+    #                        dst_port="2")
     #
     # print cli.delete_route(scr_mac="00:00:00:00:00:01",
     #                        dst_mac="00:00:00:00:00:04",

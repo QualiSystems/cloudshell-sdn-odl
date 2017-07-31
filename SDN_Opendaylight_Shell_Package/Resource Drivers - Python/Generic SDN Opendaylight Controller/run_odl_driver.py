@@ -79,7 +79,7 @@ request = """{"driverRequest": {"actions": [{"connectionId": "09faa654-9189-4b99
                                               "type": "setVlan"}]}}"""
 
 
-address = '192.168.85.27'
+address = 'localhost'
 # address = '192.168.73.49'
 # address = '192.168.73.20'
 # address = '192.168.73.56'
@@ -142,7 +142,6 @@ if __name__ == '__main__':
         get_api.return_value = type('api', (object,), {
             'DecryptPassword': lambda self, pw: type('Password', (object,), {'Value': pw})()})()
         out = driver.get_inventory(context)
-        import ipdb;ipdb.set_trace()
         # print(inv)
         # out = driver.save(context, '', '', None)
         # out = driver.restore(context, 'ftp://junos:junos@192.168.85.23/dsada-running-040117-144312', None, None, None)
