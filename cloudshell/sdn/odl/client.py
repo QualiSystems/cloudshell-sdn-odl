@@ -208,14 +208,25 @@ class ODLClient(object):
 if __name__ == "__main__":
     cli = ODLClient(address="localhost", username="admin", password="admin")
 
-    print cli.get_leaf_switches()
+    # print cli.get_leaf_switches()
 
     # print cli.create_route(src_switch="openflow:2",
+    #                        src_port="1",
+    #                        dst_switch="openflow:2",
+    #                        dst_port="2")
+
+    # print cli.delete_route(src_switch="openflow:3",
     #                        src_port="1",
     #                        dst_switch="openflow:3",
     #                        dst_port="2")
 
-    print cli.delete_route(src_switch="openflow:2",
+
+    # print cli.create_route(src_switch="openflow:3",
+    #                        src_port="1",
+    #                        dst_switch="openflow:3",
+    #                        dst_port="2")
+
+    print cli.create_route(src_switch="openflow:2",
                            src_port="1",
                            dst_switch="openflow:3",
                            dst_port="2")
