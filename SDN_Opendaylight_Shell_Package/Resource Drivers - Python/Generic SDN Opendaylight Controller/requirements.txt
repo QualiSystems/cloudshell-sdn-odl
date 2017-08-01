@@ -1,4 +1,4 @@
 cloudshell-networking-devices>=2.0,<2.1
 cloudshell-shell-core>=3.1,<3.2
-git+https://github.com/QualiSystems/cloudshell-sdn-odl.git@dev#egg=cloudshell-sdn-odl
-
+# git+https://github.com/QualiSystems/cloudshell-sdn-odl.git@dev#egg=cloudshell-sdn-odl
+cloudshell-sdn-odl>=1.0,<1.1

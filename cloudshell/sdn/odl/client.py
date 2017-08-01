@@ -81,26 +81,12 @@ class ODLClient(object):
         graph = self.get_graph()
         return graph.nodes()
 
-    # def calculate_route(self, src_sw, dst_sw):
-        # route = []
-        # graph = self.get_graph()
-        # shortest_path = nx.dijkstra_path(graph, src_sw, dst_sw)
-        #
-        # # nx.shortest_path(graph)["openflow:1"]["openflow:3"]
-        # # [u'openflow:1', u'openflow:2', u'openflow:3']
-        #
-        # for sw_name in shortest_path:
-        #     pass
-        #
-        # # [{"port_in": 1", "port_out": 2, "switch": 2} ]
-
     def get_switch(self, switch_id):
         response = self._do_get(path="restconf/operational/opendaylight-inventory:nodes/node/{}".format(switch_id))
         data = response.json()
         return data["node"][0]
 
     def calculate_routes(self, src_switch, src_port, dst_switch, dst_port):
-        # todo: rework it ... make ports as nodes???
         rules = defaultdict(dict)
         graph = self.get_graph()
 
@@ -129,28 +115,6 @@ class ODLClient(object):
         return src_route, dst_route
 
     def create_route(self, src_switch, src_port, dst_switch, dst_port):
-        """Create route
-            {
-                "cloudshell:input": {
-                    "src_mac": "src_mac",
-                    "dst_mac": "dst_mac",
-                    "allow": "true",
-                    "src_rules": [
-                        {
-                            "port_in": "1",
-                            "port_out": "2",
-                            "switch": "openflow:1"
-                        }
-                    ]
-                }
-            }
-
-        :param src_switch:
-        :param src_port:
-        :param dst_switch:
-        :param dst_port:
-        :return:
-        """
         src_rules, dst_rules = self.calculate_routes(src_switch, src_port, dst_switch, dst_port)
 
         data = {
@@ -167,29 +131,8 @@ class ODLClient(object):
         print data
         self._do_post(path="restconf/operations/cloudshell:create-route", json=data)
 
+    # todo: add another API for route deletion
     def delete_route(self, src_switch, src_port, dst_switch, dst_port):
-        """Delete route
-            {
-                "cloudshell:input": {
-                    "src_mac": "src_mac",
-                    "dst_mac": "dst_mac",
-                    "allow": "false",
-                    "route": [
-                        {
-                            "port_in": "1",
-                            "port_out": "2",
-                            "switch": "openflow:1"
-                        }
-                    ]
-                }
-            }
-
-        :param src_switch:
-        :param src_port:
-        :param dst_switch:
-        :param dst_port:
-        :return:
-        """
         data = {
             "cloudshell:input": {
                 "src_switch": src_switch,
@@ -201,7 +144,6 @@ class ODLClient(object):
                 "allow": False,
             }
         }
-        # todo: add another API
         self._do_post(path="restconf/operations/cloudshell:create-route", json=data)
 
 
@@ -210,14 +152,15 @@ if __name__ == "__main__":
 
     # print cli.get_leaf_switches()
 
+    ## h1 - h2
     # print cli.create_route(src_switch="openflow:2",
     #                        src_port="1",
     #                        dst_switch="openflow:2",
     #                        dst_port="2")
 
-    # print cli.delete_route(src_switch="openflow:3",
+    # print cli.delete_route(src_switch="openflow:2",
     #                        src_port="1",
-    #                        dst_switch="openflow:3",
+    #                        dst_switch="openflow:2",
     #                        dst_port="2")
 
 
@@ -226,7 +169,15 @@ if __name__ == "__main__":
     #                        dst_switch="openflow:3",
     #                        dst_port="2")
 
-    print cli.create_route(src_switch="openflow:2",
+
+    ## h1 - h3 create
+    # print cli.create_route(src_switch="openflow:2",
+    #                        src_port="1",
+    #                        dst_switch="openflow:3",
+    #                        dst_port="1")
+
+    ## h1 - h3 delete
+    print cli.delete_route(src_switch="openflow:2",
                            src_port="1",
                            dst_switch="openflow:3",
-                           dst_port="2")
+                           dst_port="1")

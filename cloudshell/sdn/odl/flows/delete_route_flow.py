@@ -3,5 +3,5 @@ class ODLDeleteRouteFlow(object):
         self._odl_client = odl_client
         self._logger = logger
 
-    def execute_flow(self):
-        pass
+    def execute_flow(self, src_switch, src_port, dst_switch, dst_port):
+        self._odl_client.delete_route(src_switch, src_port, dst_switch, dst_port)
