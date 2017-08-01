@@ -28,6 +28,18 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
     def delete_route_flow(self):
         pass
 
+    def _parse_port(self, full_addr):
+        full_addr_parts = full_addr.split("/")
+        port = full_addr_parts[-1]
+        return port.replace("P", "", 1)
+
+    def _parse_switch(self, full_name):
+        full_addr_parts = full_name.split("/")
+        switch_id = full_addr_parts[-2]
+        switch_id = switch_id.replace("CH", "", 1)
+        switch_id = switch_id.replace("openflow-", "openflow:")
+        return switch_id
+
     def apply_connectivity_changes(self, request):
         """ Handle apply connectivity changes request json, trigger add or remove vlan methods,
         get responce from them and create json response
@@ -68,15 +80,11 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
                 continue
 
             src_action, dst_action = actions
-            src_full_addr = src_action.actionTarget.fullAddress
-            src_full_addr_parts = src_full_addr.split("/")
-            src_port = src_full_addr_parts[-1]
-            src_switch_id = src_full_addr_parts[-2]
+            src_port = self._parse_port(src_action.actionTarget.fullAddress)
+            src_switch_id = self._parse_switch(src_action.actionTarget.fullName)
 
-            dst_full_addr = dst_action.actionTarget.fullAddress
-            dst_full_addr_parts = dst_full_addr.split("/")
-            dst_port = dst_full_addr_parts[-1]
-            dst_switch_id = dst_full_addr_parts[-2]
+            dst_port = self._parse_port(dst_action.actionTarget.fullAddress)
+            dst_switch_id = self._parse_switch(dst_action.actionTarget.fullName)
 
             try:
                 self.create_route_flow.execute_flow(src_switch=src_switch_id,
@@ -114,15 +122,11 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
                 continue
 
             src_action, dst_action = actions
-            src_full_addr = src_action.actionTarget.fullAddress
-            src_full_addr_parts = src_full_addr.split("/")
-            src_port = src_full_addr_parts[-1]
-            src_switch_id = src_full_addr_parts[-2]
+            src_port = self._parse_port(src_action.actionTarget.fullAddress)
+            src_switch_id = self._parse_switch(src_action.actionTarget.fullName)
 
-            dst_full_addr = dst_action.actionTarget.fullAddress
-            dst_full_addr_parts = dst_full_addr.split("/")
-            dst_port = dst_full_addr_parts[-1]
-            dst_switch_id = dst_full_addr_parts[-2]
+            dst_port = self._parse_port(dst_action.actionTarget.fullAddress)
+            dst_switch_id = self._parse_switch(dst_action.actionTarget.fullName)
 
             try:
                 self.delete_route_flow.execute_flow(src_switch=src_switch_id,

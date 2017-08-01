@@ -51,11 +51,12 @@ class ODLAutoloadFlow(object):
 
         for switch_id in self._odl_client.get_leaf_switches():
             sw_resource = OpenVSwitchChassis(shell_name="",
-                                             name="Switch {}".format(switch_id.replace(":", "-")),
-                                             unique_id="{}".format(switch_id.split(":")[-1]))
+                                             name=switch_id.replace(":", "-"),
+                                             unique_id=switch_id.split(":")[-1])
 
             switch = self._odl_client.get_switch(switch_id)
             sw_ = switch_id.split(":")[-1]
+
             self._resource.add_sub_resource(sw_, sw_resource)
 
             for port in [port for port in switch["node-connector"]
@@ -78,7 +79,7 @@ class ODLAutoloadFlow(object):
                 unique_id = "{}.{}".format(sw_, port_no)
 
                 port_object = GenericPort(shell_name="",
-                                          name=port_name,
+                                          name=port_name.replace(":", "-"),
                                           unique_id=unique_id)
 
                 port_object.port_description = ""

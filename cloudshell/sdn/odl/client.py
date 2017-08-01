@@ -176,8 +176,14 @@ if __name__ == "__main__":
     #                        dst_switch="openflow:3",
     #                        dst_port="1")
 
-    ## h1 - h3 delete
-    print cli.delete_route(src_switch="openflow:2",
+    # ## h1 - h3 delete
+    # print cli.delete_route(src_switch="openflow:2",
+    #                        src_port="1",
+    #                        dst_switch="openflow:3",
+    #                        dst_port="1")
+
+    ## h1 - h2 simple topo
+    print cli.delete_route(src_switch="openflow:1",
                            src_port="1",
-                           dst_switch="openflow:3",
-                           dst_port="1")
+                           dst_switch="openflow:1",
+                           dst_port="2")

@@ -36,8 +36,8 @@ request = """{"driverRequest": {"actions": [{"connectionId": "09faa654-9189-4b99
                                                                    "type": "setVlanParameter"}, "connectorAttributes": [
             {"attributeName": "Selected Network", "attributeValue": "2", "type": "connectorAttribute"}],
                                               "actionId": "09faa654-9189-4b99-973c-01f5222f1db9_103b5867-caec-4c78-a891-90ae750098c4",
-                                              "actionTarget": {"fullName": "SDN ODL2/SDN Switch 479889733/eth1",
-                                                               "fullAddress": "192.168.42.157/00:00:00:00:00:00:00:02/1",
+                                              "actionTarget": {"fullName": "SDN ODL2/openflow-2/s2-eth1",
+                                                               "fullAddress": "192.168.42.157/CH2/P1",
                                                                "type": "actionTarget"}, "customActionAttributes": [],
                                               "type": "setVlan"},
                                              {"connectionId": "09faa654-9189-4b99-973c-01f5222f1db9",
@@ -73,8 +73,8 @@ request = """{"driverRequest": {"actions": [{"connectionId": "09faa654-9189-4b99
                                                  {"attributeName": "Selected Network", "attributeValue": "2",
                                                   "type": "connectorAttribute"}],
                                               "actionId": "09faa654-9189-4b99-973c-01f5222f1db9_884f8bbc-7984-4db6-ae10-574cfa7b31b2",
-                                              "actionTarget": {"fullName": "SDN ODL2/SDN Switch 479889734/eth3",
-                                                               "fullAddress": "192.168.42.157/00:00:00:00:00:00:00:03/1",
+                                              "actionTarget": {"fullName": "SDN ODL2/openflow-2/openflow-2-2",
+                                                               "fullAddress": "192.168.42.157/CH2/P2",
                                                                "type": "actionTarget"}, "customActionAttributes": [],
                                               "type": "setVlan"}]}}"""
 
@@ -142,6 +142,8 @@ if __name__ == '__main__':
         get_api.return_value = type('api', (object,), {
             'DecryptPassword': lambda self, pw: type('Password', (object,), {'Value': pw})()})()
         out = driver.get_inventory(context)
+
+        # driver.ApplyConnectivityChanges(context=context, request=request)
         # print(inv)
         # out = driver.save(context, '', '', None)
         # out = driver.restore(context, 'ftp://junos:junos@192.168.85.23/dsada-running-040117-144312', None, None, None)
