@@ -37,7 +37,7 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
         full_addr_parts = full_name.split("/")
         switch_id = full_addr_parts[-2]
         switch_id = switch_id.replace("CH", "", 1)
-        switch_id = switch_id.replace("openflow-", "openflow:")
+        switch_id = switch_id.replace("openflow_", "openflow:")
         return switch_id
 
     def apply_connectivity_changes(self, request):
@@ -151,7 +151,7 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
                         action=action,
                         result_string="Successfully disconnected {}".format(full_name))
 
-                request_result.append(action_result)
+                    request_result.append(action_result)
 
         driver_response.actionResults = request_result
         driver_response_root.driverResponse = driver_response
