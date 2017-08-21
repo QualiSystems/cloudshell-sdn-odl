@@ -8,6 +8,7 @@ from cloudshell.networking.apply_connectivity.models.connectivity_result import 
     ConnectivitySuccessResponse
 from cloudshell.devices.json_request_helper import JsonRequestDeserializer
 from cloudshell.devices.networking_utils import serialize_to_json
+from cloudshell.devices.networking_utils import validate_vlan_number
 from cloudshell.devices.runners.interfaces.connectivity_runner_interface import ConnectivityOperationsInterface
 
 
@@ -21,11 +22,11 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
         self._resource_config = resource_config
 
     @abstractproperty
-    def create_route_flow(self):
+    def create_connectivity_flow(self):
         pass
 
     @abstractproperty
-    def delete_route_flow(self):
+    def remove_connectivity_flow(self):
         pass
 
     def _parse_port(self, full_addr):
@@ -33,12 +34,41 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
         port = full_addr_parts[-1]
         return port.replace("P", "", 1)
 
+    def _parse_port_name(self, full_name):
+        return full_name.split("/")[-1]
+
     def _parse_switch(self, full_name):
         full_addr_parts = full_name.split("/")
         switch_id = full_addr_parts[-2]
         switch_id = switch_id.replace("CH", "", 1)
-        switch_id = switch_id.replace("openflow_", "openflow:")
+        switch_id = switch_id.replace("openflow-", "openflow:")
         return switch_id
+
+    def _get_vlan_list(self, vlan_str):
+        """Get VLAN list from input string
+
+        :param str vlan_str:
+        :rtype: list[str]
+        """
+        result = set()
+
+        for splitted_vlan in vlan_str.split(","):
+            if "-" not in splitted_vlan:
+                if validate_vlan_number(splitted_vlan):
+                    result.add(int(splitted_vlan))
+                else:
+                    raise Exception(self.__class__.__name__, "Wrong VLAN number detected {}".format(splitted_vlan))
+            else:
+                start, end = map(int, splitted_vlan.split("-"))
+                if validate_vlan_number(start) and validate_vlan_number(end):
+                    if start > end:
+                        start, end = end, start
+                    for vlan in range(start, end + 1):
+                        result.add(vlan)
+                else:
+                    raise Exception(self.__class__.__name__, "Wrong VLANs range detected {}".format(vlan_str))
+
+        return map(str, list(result))
 
     def apply_connectivity_changes(self, request):
         """ Handle apply connectivity changes request json, trigger add or remove vlan methods,
@@ -63,34 +93,30 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
         request_result = []
 
         for action in holder.driverRequest.actions:
-            vlan_id = action.connectionParams.vlanId
+            for vlan_id in self._get_vlan_list(action.connectionParams.vlanId):
+                if action.type == "setVlan":
+                    connects.setdefault(vlan_id, []).append(action)
 
-            if action.type == "setVlan":
-                connects.setdefault(vlan_id, []).append(action)
+                elif action.type == "removeVlan":
+                    disconnects.setdefault(vlan_id, []).append(action)
 
-            elif action.type == "removeVlan":
-                disconnects.setdefault(vlan_id, []).append(action)
+        for vlan_id, actions in connects.iteritems():
+            access_ports = []
+            trunk_ports = []
 
-        for actions in connects.itervalues():
-            if len(actions) != 2:
-                action = actions[0]
-                action_result = ConnectivityErrorResponse(action=action,
-                                                          error_string="Can't find another switch to connect to")
-                request_result.append(action_result)
-                continue
+            for action in actions:
+                phys_port_name = self._parse_port_name(full_name=action.actionTarget.fullName)
+                switch_id = self._parse_switch(full_name=action.actionTarget.fullName)
 
-            src_action, dst_action = actions
-            src_port = self._parse_port(src_action.actionTarget.fullAddress)
-            src_switch_id = self._parse_switch(src_action.actionTarget.fullName)
-
-            dst_port = self._parse_port(dst_action.actionTarget.fullAddress)
-            dst_switch_id = self._parse_switch(dst_action.actionTarget.fullName)
+                if action.connectionParams.mode.lower() == "access":
+                    access_ports.append((switch_id, phys_port_name))
+                else:
+                    trunk_ports.append((switch_id, phys_port_name))
 
             try:
-                self.create_route_flow.execute_flow(src_switch=src_switch_id,
-                                                    src_port=src_port,
-                                                    dst_switch=dst_switch_id,
-                                                    dst_port=dst_port)
+                self.create_connectivity_flow.execute_flow(vlan_id=vlan_id,
+                                                           access_ports=access_ports,
+                                                           trunk_ports=trunk_ports)
             except Exception:
                 for action in actions:
                     full_name = action.actionTarget.fullName
@@ -99,10 +125,7 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
                         error_string="Failed to connect {}".format(full_name))
 
                     request_result.append(action_result)
-
-                self._logger.exception("Failed to process actions: {}, {}".format(src_action.actionId,
-                                                                                  dst_action.actionId))
-
+                    self._logger.exception("Failed to process action: {}".format(action.actionId))
             else:
                 for action in actions:
                     full_name = action.actionTarget.fullName
@@ -111,31 +134,18 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
                         result_string="Successfully connected {}".format(full_name))
 
                     request_result.append(action_result)
+                    self._logger.info("Successfully processed action: {}".format(action.actionId))
 
-        # todo: remove duplicated code
-        for actions in disconnects.itervalues():
-            if len(actions) != 2:
-                action = actions[0]
-                action_result = ConnectivityErrorResponse(action=action,
-                                                          error_string="Can't find another switch to disconnect from")
-                request_result.append(action_result)
-                continue
+        for vlan_id, actions in disconnects.iteritems():
+            ports = []
 
-            src_action, dst_action = actions
-            src_port = self._parse_port(src_action.actionTarget.fullAddress)
-            src_switch_id = self._parse_switch(src_action.actionTarget.fullName)
-
-            dst_port = self._parse_port(dst_action.actionTarget.fullAddress)
-            dst_switch_id = self._parse_switch(dst_action.actionTarget.fullName)
+            for action in actions:
+                phys_port_name = self._parse_port_name(full_name=action.actionTarget.fullName)
+                ports.append(phys_port_name)
 
             try:
-                self.delete_route_flow.execute_flow(src_switch=src_switch_id,
-                                                    src_port=src_port,
-                                                    dst_switch=dst_switch_id,
-                                                    dst_port=dst_port)
-
-                self._logger.exception("Failed to process actions: {}, {}".format(src_action.actionId,
-                                                                                  dst_action.actionId))
+                self.remove_connectivity_flow.execute_flow(vlan_id=vlan_id,
+                                                           ports=ports)
             except Exception:
                 for action in actions:
                     full_name = action.actionTarget.fullName
@@ -144,6 +154,7 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
                         error_string="Failed to disconnect {}".format(full_name))
 
                     request_result.append(action_result)
+                    self._logger.exception("Failed to process action: {}".format(action.actionId))
             else:
                 for action in actions:
                     full_name = action.actionTarget.fullName
@@ -152,6 +163,7 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
                         result_string="Successfully disconnected {}".format(full_name))
 
                     request_result.append(action_result)
+                    self._logger.info("Successfully processed action: {}".format(action.actionId))
 
         driver_response.actionResults = request_result
         driver_response_root.driverResponse = driver_response

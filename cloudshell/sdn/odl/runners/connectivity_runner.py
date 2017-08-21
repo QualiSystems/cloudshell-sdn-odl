@@ -1,6 +1,6 @@
+from cloudshell.sdn.odl.flows.create_connectivity_flow import ODLCreateConnectivityFlow
+from cloudshell.sdn.odl.flows.remove_connectivity_flow import ODLRemoveConnectivityFlow
 from cloudshell.sdn.runners.connectivity_runner import SDNConnectivityRunner
-from cloudshell.sdn.odl.flows.create_route_flow import ODLCreateRouteFlow
-from cloudshell.sdn.odl.flows.delete_route_flow import ODLDeleteRouteFlow
 
 
 class ODLConnectivityRunner(SDNConnectivityRunner):
@@ -9,9 +9,9 @@ class ODLConnectivityRunner(SDNConnectivityRunner):
         self._odl_client = odl_client
 
     @property
-    def create_route_flow(self):
-        return ODLCreateRouteFlow(odl_client=self._odl_client, logger=self._logger)
+    def create_connectivity_flow(self):
+        return ODLCreateConnectivityFlow(odl_client=self._odl_client, logger=self._logger)
 
     @property
-    def delete_route_flow(self):
-        return ODLDeleteRouteFlow(odl_client=self._odl_client, logger=self._logger)
+    def remove_connectivity_flow(self):
+        return ODLRemoveConnectivityFlow(odl_client=self._odl_client, logger=self._logger)

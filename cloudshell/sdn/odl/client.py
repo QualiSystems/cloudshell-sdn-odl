@@ -1,12 +1,12 @@
-from collections import defaultdict
-import json
-
 import networkx as nx
 import requests
 from requests.auth import HTTPBasicAuth
 
 
 class ODLClient(object):
+    VTN_NAME_PREFIX = "VTN_VLAN_"
+    VBRIDGE_NAME_PREFIX = "VBRINDGE_VLAN_"
+
     def __init__(self, address, username, password, port=8181):
         if "http" not in address:
             address = "{}://{}".format("http", address)
@@ -86,104 +86,67 @@ class ODLClient(object):
         data = response.json()
         return data["node"][0]
 
-    def calculate_routes(self, src_switch, src_port, dst_switch, dst_port):
-        rules = defaultdict(dict)
-        graph = self.get_graph()
-
-        rules[src_switch]["port_in"] = int(src_port)
-        rules[dst_switch]["port_out"] = int(dst_port)
-
-        shortest_path = nx.dijkstra_path(graph, src_switch, dst_switch)
-
-        for x in xrange(len(shortest_path) - 1):
-            src_sw = shortest_path[x]
-            dst_sw = shortest_path[x + 1]
-            data = graph.get_edge_data(src_sw, dst_sw)
-            rules[src_sw]["port_out"] = int(data["src_tp"].split(":")[-1])
-            rules[dst_sw]["port_in"] = int(data["dst_tp"].split(":")[-1])
-
-        src_route = []
-        dst_route = []
-
-        for key, items in rules.iteritems():
-            items["switch"] = key
-            src_route.append(items)
-            dst_items = items.copy()
-            dst_items["port_in"], dst_items["port_out"] = dst_items["port_out"], dst_items["port_in"]
-            dst_route.append(dst_items)
-
-        return src_route, dst_route
-
-    def create_route(self, src_switch, src_port, dst_switch, dst_port):
-        src_rules, dst_rules = self.calculate_routes(src_switch, src_port, dst_switch, dst_port)
-
+    def create_vtn(self, tenant_name):
         data = {
-            "cloudshell:input": {
-                "src_switch": src_switch,
-                "src_port": src_port,
-                "dst_switch": dst_switch,
-                "dst_port": dst_port,
-                "src_rules": json.dumps(src_rules),
-                "dst_rules": json.dumps(dst_rules),
-                "allow": True,
+            "input": {
+                "tenant-name": tenant_name
             }
         }
-        print data
-        self._do_post(path="restconf/operations/cloudshell:create-route", json=data)
+        self._do_post(path="restconf/operations/vtn:update-vtn", json=data)
 
-    # todo: add another API for route deletion
-    def delete_route(self, src_switch, src_port, dst_switch, dst_port):
+    def vtn_interfaces_exists(self, tenant_name, bridge_name):
+        response = self._do_get(path="restconf/operational/vtn:vtns/vtn/{}/vbridge/{}".format(tenant_name, bridge_name))
+        data = response.json()
+        vbridge = data.get("vbridge")[0]
+
+        return bool(vbridge.get("vinterface"))
+
+    def delete_vtn(self, tenant_name):
         data = {
-            "cloudshell:input": {
-                "src_switch": src_switch,
-                "src_port": src_port,
-                "dst_switch": dst_switch,
-                "dst_port": dst_port,
-                "src_rules": "",
-                "dst_rules": "",
-                "allow": False,
+            "input": {
+                "tenant-name": tenant_name
             }
         }
-        self._do_post(path="restconf/operations/cloudshell:create-route", json=data)
+        self._do_post(path="restconf/operations/vtn:remove-vtn", json=data)
 
+    def create_vbridge(self, tenant_name, bridge_name):
+        data = {
+            "input": {
+                "tenant-name": tenant_name,
+                "bridge-name": bridge_name
+            }
+        }
+        self._do_post(path="restconf/operations/vtn-vbridge:update-vbridge", json=data)
 
-if __name__ == "__main__":
-    cli = ODLClient(address="localhost", username="admin", password="admin")
+    def create_interface(self, tenant_name, bridge_name, if_name):
+        data = {
+            "input": {
+                "tenant-name": tenant_name,
+                "bridge-name": bridge_name,
+                "interface-name": if_name
+            }
+        }
+        self._do_post(path="restconf/operations/vtn-vinterface:update-vinterface", json=data)
 
-    # print cli.get_leaf_switches()
+    def delete_interface(self, tenant_name, bridge_name, if_name):
+        data = {
+            "input": {
+                "tenant-name": tenant_name,
+                "bridge-name": bridge_name,
+                "interface-name": if_name
+            }
+        }
+        self._do_post(path="restconf/operations/vtn-vinterface:remove-vinterface", json=data)
 
-    ## h1 - h2
-    # print cli.create_route(src_switch="openflow:2",
-    #                        src_port="1",
-    #                        dst_switch="openflow:2",
-    #                        dst_port="2")
-
-    # print cli.delete_route(src_switch="openflow:2",
-    #                        src_port="1",
-    #                        dst_switch="openflow:2",
-    #                        dst_port="2")
-
-
-    # print cli.create_route(src_switch="openflow:3",
-    #                        src_port="1",
-    #                        dst_switch="openflow:3",
-    #                        dst_port="2")
-
-
-    ## h1 - h3 create
-    # print cli.create_route(src_switch="openflow:2",
-    #                        src_port="1",
-    #                        dst_switch="openflow:3",
-    #                        dst_port="1")
-
-    # ## h1 - h3 delete
-    # print cli.delete_route(src_switch="openflow:2",
-    #                        src_port="1",
-    #                        dst_switch="openflow:3",
-    #                        dst_port="1")
-
-    ## h1 - h2 simple topo
-    print cli.delete_route(src_switch="openflow:1",
-                           src_port="1",
-                           dst_switch="openflow:1",
-                           dst_port="2")
+    def map_port_to_interface(self, tenant_name, bridge_name, if_name, node_id, phys_port_name, vlan_id):
+        data = {
+            "input": {
+                "tenant-name": tenant_name,
+                "bridge-name": bridge_name,
+                "interface-name": if_name,
+                "node": node_id,
+                "port-name": phys_port_name,
+                "vlan-id": vlan_id
+            }
+        }
+        self._do_post(path="restconf/operations/vtn-port-map:set-port-map", json=data)

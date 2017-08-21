@@ -35,7 +35,6 @@ class ODLAutoloadFlow(object):
         self._resource.vendor = "Opendaylight"
 
     def execute_flow(self):
-
         self._set_controller_details()
         # ports used in connections between switches
         used_ports = []
