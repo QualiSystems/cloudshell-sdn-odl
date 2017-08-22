@@ -7,8 +7,8 @@ class ODLRemoveConnectivityFlow(object):
         tenant_name = "{}{}".format(self._odl_client.VTN_NAME_PREFIX, vlan_id)
         bridge_name = "{}{}".format(self._odl_client.VBRIDGE_NAME_PREFIX, vlan_id)
 
-        for port in ports:
-            interface = port.replace("-", "_")
+        for node_id, interface in ports:
+            interface = "{}_{}".format(node_id, interface).replace("-", "_").replace(":", "_")
             self._odl_client.delete_interface(tenant_name=tenant_name, bridge_name=bridge_name, if_name=interface)
 
         if not self._odl_client.vtn_interfaces_exists(tenant_name=tenant_name, bridge_name=bridge_name):

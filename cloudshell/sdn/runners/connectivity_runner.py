@@ -142,7 +142,8 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
 
             for action in actions:
                 phys_port_name = self._parse_port_name(full_name=action.actionTarget.fullName)
-                ports.append(phys_port_name)
+                switch_id = self._parse_switch(full_name=action.actionTarget.fullName)
+                ports.append((switch_id, phys_port_name))
 
             try:
                 self.remove_connectivity_flow.execute_flow(vlan_id=vlan_id,

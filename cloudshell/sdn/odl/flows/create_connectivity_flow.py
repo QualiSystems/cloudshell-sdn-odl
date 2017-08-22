@@ -19,7 +19,7 @@ class ODLCreateConnectivityFlow(object):
 
         for node_id, interface in access_ports:
             phys_port_name = interface
-            interface = interface.replace("-", "_")
+            interface = "{}_{}".format(node_id, interface).replace("-", "_").replace(":", "_")
             self._odl_client.create_interface(tenant_name=tenant_name, bridge_name=bridge_name, if_name=interface)
 
             self._odl_client.map_port_to_interface(tenant_name=tenant_name,
@@ -31,7 +31,7 @@ class ODLCreateConnectivityFlow(object):
 
         for node_id, interface in trunk_ports:
             phys_port_name = interface
-            interface = interface.replace("-", "_")
+            interface = "{}_{}".format(node_id, interface).replace("-", "_").replace(":", "_")
             self._odl_client.create_interface(tenant_name=tenant_name, bridge_name=bridge_name, if_name=interface)
 
             self._odl_client.map_port_to_interface(tenant_name=tenant_name,
