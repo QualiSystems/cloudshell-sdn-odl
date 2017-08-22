@@ -41,7 +41,8 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
         full_addr_parts = full_name.split("/")
         switch_id = full_addr_parts[-2]
         switch_id = switch_id.replace("CH", "", 1)
-        switch_id = switch_id.replace("openflow-", "openflow:")
+        # todo: move ":" symbol replacing to one place
+        switch_id = switch_id.replace("openflow_", "openflow:")
         return switch_id
 
     def _get_vlan_list(self, vlan_str):

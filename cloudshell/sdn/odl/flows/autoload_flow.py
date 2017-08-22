@@ -50,7 +50,7 @@ class ODLAutoloadFlow(object):
 
         for switch_id in self._odl_client.get_leaf_switches():
             sw_resource = OpenVSwitchChassis(shell_name="",
-                                             name=switch_id.replace(":", "_"),
+                                             name=switch_id.replace("openflow:", "openflow_"),
                                              unique_id=switch_id.split(":")[-1])
 
             switch = self._odl_client.get_switch(switch_id)
