@@ -39,12 +39,12 @@ class OpendaylightResourceDriver(ResourceDriverInterface, SDNResourceDriverInter
                                port=resource_config.port,
                                password=password)
 
-        connectivity_runnner = ODLConnectivityRunner(odl_client=odl_client,
-                                                     logger=logger,
-                                                     resource_config=resource_config)
+        connectivity_runner = ODLConnectivityRunner(odl_client=odl_client,
+                                                    logger=logger,
+                                                    resource_config=resource_config)
 
         logger.info('Start applying connectivity changes, request is: {0}'.format(str(request)))
-        result = connectivity_runnner.apply_connectivity_changes(request=request)
+        result = connectivity_runner.apply_connectivity_changes(request=request)
         logger.info('Finished applying connectivity changes, response is: {0}'.format(str(result)))
         logger.info('Apply Connectivity changes completed')
 

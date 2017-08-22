@@ -1,5 +1,8 @@
+import httplib
+
 import networkx as nx
 import requests
+from requests import HTTPError
 from requests.auth import HTTPBasicAuth
 
 
@@ -73,6 +76,30 @@ class ODLClient(object):
         # leaf switches will have only one outgoing link or will haven't links at all
         return [node for node, out_links_count in graph.out_degree().items() if out_links_count <= 1]
 
+    def get_leaf_interfaces(self):
+        used_ports = []
+        topo = self.get_topology()
+        switch_ids = self.get_switches()
+        result = []
+
+        for link in topo.get("link", []):
+            tp = link["destination"]["dest-node"]
+            op = link["source"]["source-node"]
+            if tp in switch_ids and op in switch_ids:
+                used_ports.append(link["source"]["source-tp"])
+                used_ports.append(link["destination"]["dest-tp"])
+
+        for switch_id in self.get_leaf_switches():
+            switch = self.get_switch(switch_id)
+
+            for port in [port for port in switch["node-connector"]
+                         if port["id"] not in used_ports
+                         and "local" not in port["id"].lower()]:
+
+                result.append((switch_id, port["flow-node-inventory:name"]))
+
+        return result
+
     def get_switches(self):
         """Return leaf switches
 
@@ -94,12 +121,16 @@ class ODLClient(object):
         }
         self._do_post(path="restconf/operations/vtn:update-vtn", json=data)
 
-    def vtn_interfaces_exists(self, tenant_name, bridge_name):
+    def vtn_access_interfaces_exists(self, tenant_name, bridge_name):
         response = self._do_get(path="restconf/operational/vtn:vtns/vtn/{}/vbridge/{}".format(tenant_name, bridge_name))
         data = response.json()
         vbridge = data.get("vbridge")[0]
 
-        return bool(vbridge.get("vinterface"))
+        for interface in vbridge.get("vinterface", []):
+            if interface.get("port-map-config", {}).get("vlan-id") == 0:
+                return True
+
+        return False
 
     def delete_vtn(self, tenant_name):
         data = {
@@ -127,6 +158,19 @@ class ODLClient(object):
             }
         }
         self._do_post(path="restconf/operations/vtn-vinterface:update-vinterface", json=data)
+
+    def get_interface(self, tenant_name, bridge_name, if_name):
+        try:
+            response = self._do_get(path="restconf/operational/vtn:vtns/vtn/{}/vbridge/{}/vinterface/{}"
+                                    .format(tenant_name, bridge_name, if_name))
+        except HTTPError as e:
+            if e.response.status_code == httplib.NOT_FOUND:
+                pass
+            else:
+                raise
+        else:
+            data = response.json()
+            return data["vinterface"][0]
 
     def delete_interface(self, tenant_name, bridge_name, if_name):
         data = {

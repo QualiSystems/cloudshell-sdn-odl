@@ -36,7 +36,7 @@ request = """{"driverRequest": {"actions": [{"connectionId": "09faa654-9189-4b99
                                                                    "type": "setVlanParameter"}, "connectorAttributes": [
             {"attributeName": "Selected Network", "attributeValue": "2", "type": "connectorAttribute"}],
                                               "actionId": "09faa654-9189-4b99-973c-01f5222f1db9_103b5867-caec-4c78-a891-90ae750098c4",
-                                              "actionTarget": {"fullName": "SDN ODL2/openflow-1/s1-eth2",
+                                              "actionTarget": {"fullName": "SDN ODL2/openflow_1/s1-eth1",
                                                                "fullAddress": "192.168.42.157/CH2/P1",
                                                                "type": "actionTarget"}, "customActionAttributes": [],
                                               "type": "setVlan"},

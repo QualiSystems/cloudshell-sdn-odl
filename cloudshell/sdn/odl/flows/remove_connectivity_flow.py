@@ -11,5 +11,5 @@ class ODLRemoveConnectivityFlow(object):
             interface = "{}_{}".format(node_id, interface).replace("-", "_").replace(":", "_")
             self._odl_client.delete_interface(tenant_name=tenant_name, bridge_name=bridge_name, if_name=interface)
 
-        if not self._odl_client.vtn_interfaces_exists(tenant_name=tenant_name, bridge_name=bridge_name):
+        if not self._odl_client.vtn_access_interfaces_exists(tenant_name=tenant_name, bridge_name=bridge_name):
             self._odl_client.delete_vtn(tenant_name)
