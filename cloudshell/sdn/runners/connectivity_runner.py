@@ -1,23 +1,28 @@
-import jsonpickle
-
 from abc import abstractproperty
+
+import jsonpickle
 
 from cloudshell.core.driver_response import DriverResponse
 from cloudshell.core.driver_response_root import DriverResponseRoot
-from cloudshell.networking.apply_connectivity.models.connectivity_result import ConnectivityErrorResponse, \
-    ConnectivitySuccessResponse
 from cloudshell.devices.json_request_helper import JsonRequestDeserializer
 from cloudshell.devices.networking_utils import serialize_to_json
 from cloudshell.devices.networking_utils import validate_vlan_number
 from cloudshell.devices.runners.interfaces.connectivity_runner_interface import ConnectivityOperationsInterface
+from cloudshell.networking.apply_connectivity.models.connectivity_result import ConnectivityErrorResponse
+from cloudshell.networking.apply_connectivity.models.connectivity_result import ConnectivitySuccessResponse
 
 
 class SDNConnectivityRunner(ConnectivityOperationsInterface):
     APPLY_CONNECTIVITY_CHANGES_ACTION_REQUIRED_ATTRIBUTE_LIST = ["type", "actionId",
                                                                  ("connectionParams", "mode"),
-                                                                 ("actionTarget", "fullAddress")]
+                                                                 ("actionTarget", "fullName")]
 
     def __init__(self, logger, resource_config):
+        """
+
+        :param logging.Logger logger:
+        :param resource_config: cloudshell.sdn.config_attrs_structure.GenericSDNResource
+        """
         self._logger = logger
         self._resource_config = resource_config
 
@@ -29,24 +34,27 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
     def remove_connectivity_flow(self):
         pass
 
-    def _parse_port(self, full_addr):
-        full_addr_parts = full_addr.split("/")
-        port = full_addr_parts[-1]
-        return port.replace("P", "", 1)
+    def _parse_port(self, full_name):
+        """Parse port name from the resource full name
 
-    def _parse_port_name(self, full_name):
+        :param str full_name:
+        :rtype: str
+        """
         return full_name.split("/")[-1]
 
     def _parse_switch(self, full_name):
-        full_addr_parts = full_name.split("/")
-        switch_id = full_addr_parts[-2]
-        switch_id = switch_id.replace("CH", "", 1)
+        """Parse switch name from the resource full name
+
+        :param str full_name:
+        :rtype: str
+        """
+        switch_id = full_name.split("/")[-2]
         # todo: move ":" symbol replacing to one place
         switch_id = switch_id.replace("openflow_", "openflow:")
         return switch_id
 
     def _get_vlan_list(self, vlan_str):
-        """Get VLAN list from input string
+        """Get VLAN list from the input string
 
         :param str vlan_str:
         :rtype: list[str]
@@ -71,13 +79,11 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
 
         return map(str, list(result))
 
-    def apply_connectivity_changes(self, request):
-        """ Handle apply connectivity changes request json, trigger add or remove vlan methods,
-        get responce from them and create json response
+    def _get_json_request_deserializer(self, request):
+        """Convert and validate JSON request into JsonRequestDeserializer object
 
-        :param request: json with all required action to configure or remove vlans from certain port
-        :return Serialized DriverResponseRoot to json
-        :rtype json
+        :param dict request: json with all required action to configure or remove VLANs from certain port
+        :rtype: JsonRequestDeserializer
         """
         if request is None or request == "":
             raise Exception(self.__class__.__name__, "request is None or empty")
@@ -87,13 +93,18 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
         if not holder or not hasattr(holder, "driverRequest"):
             raise Exception(self.__class__.__name__, "Deserialized request is None or empty")
 
-        driver_response = DriverResponse()
-        driver_response_root = DriverResponseRoot()
+        return holder
+
+    def _get_combined_actions(self, request_deserializer):
+        """Combine actions by action type and VLAN number
+
+        :param JsonRequestDeserializer request_deserializer:
+        :rtype: tuple[dict]
+        """
         connects = {}
         disconnects = {}
-        request_result = []
 
-        for action in holder.driverRequest.actions:
+        for action in request_deserializer.driverRequest.actions:
             for vlan_id in self._get_vlan_list(action.connectionParams.vlanId):
                 if action.type == "setVlan":
                     connects.setdefault(vlan_id, []).append(action)
@@ -101,12 +112,22 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
                 elif action.type == "removeVlan":
                     disconnects.setdefault(vlan_id, []).append(action)
 
-        for vlan_id, actions in connects.iteritems():
+        return connects, disconnects
+
+    def _process_set_vlan_actions(self, actions):
+        """Process set VLAN actions and return request results
+
+        :param list actions:
+        :rtype: list[ConnectivitySuccessResponse]
+        """
+        request_result = []
+
+        for vlan_id, actions in actions.iteritems():
             access_ports = []
             trunk_ports = []
 
             for action in actions:
-                phys_port_name = self._parse_port_name(full_name=action.actionTarget.fullName)
+                phys_port_name = self._parse_port(full_name=action.actionTarget.fullName)
                 switch_id = self._parse_switch(full_name=action.actionTarget.fullName)
 
                 if action.connectionParams.mode.lower() == "access":
@@ -137,11 +158,21 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
                     request_result.append(action_result)
                     self._logger.info("Successfully processed action: {}".format(action.actionId))
 
-        for vlan_id, actions in disconnects.iteritems():
+        return request_result
+
+    def _process_remove_vlan_actions(self, actions):
+        """Process remove VLAN actions and return request results
+
+        :param list actions:
+        :rtype: list[ConnectivitySuccessResponse]
+        """
+        request_result = []
+
+        for vlan_id, actions in actions.iteritems():
             ports = []
 
             for action in actions:
-                phys_port_name = self._parse_port_name(full_name=action.actionTarget.fullName)
+                phys_port_name = self._parse_port(full_name=action.actionTarget.fullName)
                 switch_id = self._parse_switch(full_name=action.actionTarget.fullName)
                 ports.append((switch_id, phys_port_name))
 
@@ -167,7 +198,26 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
                     request_result.append(action_result)
                     self._logger.info("Successfully processed action: {}".format(action.actionId))
 
-        driver_response.actionResults = request_result
+        return request_result
+
+    def apply_connectivity_changes(self, request):
+        """Handle apply connectivity changes request json, trigger add or remove VLAN methods,
+
+        get response from them and create json response
+        :param dict request: json with all required action to configure or remove VLANs from certain port
+        :return Serialized DriverResponseRoot to json
+        :rtype: json
+        """
+        driver_response = DriverResponse()
+        driver_response_root = DriverResponseRoot()
+
+        request_deserializer = self._get_json_request_deserializer(request)
+        set_vlan_actions, remove_vlan_actions = self._get_combined_actions(request_deserializer)
+
+        actions_result = (self._process_set_vlan_actions(set_vlan_actions)
+                          + self._process_remove_vlan_actions(remove_vlan_actions))
+
+        driver_response.actionResults = actions_result
         driver_response_root.driverResponse = driver_response
 
         return serialize_to_json(driver_response_root).replace("[true]", "true")

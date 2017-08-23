@@ -6,20 +6,27 @@ class SDNAutoloadRunner(object):
     __metaclass__ = ABCMeta
 
     def __init__(self, logger, api, resource_config):
+        """
+
+        :param logging.Logger logger:
+        :param cloudshell.api.cloudshell_api.CloudShellAPISession api:
+        :param resource_config: cloudshell.sdn.config_attrs_structure.GenericSDNResource
+        """
         self._logger = logger
         self._api = api
         self._resource_config = resource_config
 
     @abstractproperty
     def autoload_flow(self):
-        """ Autoload flow property
+        """Autoload flow property
+
         :return: AutoloadFlow object
         """
         pass
 
     def discover(self):
-        """Enable and Disable SNMP communityon the device, Read it's structure and attributes: chassis, modules,
-        submodules, ports, port-channels and power supplies
+        """Read device structure and it's attributes (switches, ports)
+
         :return: AutoLoadDetails object
         """
         return self.autoload_flow.execute_flow()

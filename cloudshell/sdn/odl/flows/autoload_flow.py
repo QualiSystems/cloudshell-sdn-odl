@@ -13,20 +13,26 @@ class OpenVSwitchChassis(GenericChassis):
 
 class ODLAutoloadFlow(object):
     def __init__(self, odl_client, logger, api, resource_config):
+        """
+
+        :param cloudshell.sdn.odl.client.ODLClient odl_client:
+        :param logging.Logger logger:
+        :param cloudshell.api.cloudshell_api.CloudShellAPISession api:
+        :param resource_config: cloudshell.sdn.config_attrs_structure.GenericSDNResource
+        """
         self._odl_client = odl_client
         self._logger = logger
         self._api = api
         self._resource_config = resource_config
         self._resources = []
         self._attributes = []
-
         self._resource = SDNODLController(shell_name="",
                                           shell_type="CS_Controller",
                                           name="ODL Controller",
                                           unique_id="ODL Controller")
 
     def _set_controller_details(self):
-        """ Get root element attributes """
+        """Get root element attributes"""
         self._resource.contact_name = ""
         self._resource.system_name = ""
         self._resource.location = ""
@@ -49,14 +55,13 @@ class ODLAutoloadFlow(object):
                 used_ports.append(link["destination"]["dest-tp"])
 
         for switch_id in self._odl_client.get_leaf_switches():
+            sw_unique_id = switch_id.split(":")[-1]
             sw_resource = OpenVSwitchChassis(shell_name="",
                                              name=switch_id.replace("openflow:", "openflow_"),
-                                             unique_id=switch_id.split(":")[-1])
+                                             unique_id=sw_unique_id)
 
             switch = self._odl_client.get_switch(switch_id)
-            sw_ = switch_id.split(":")[-1]
-
-            self._resource.add_sub_resource(sw_, sw_resource)
+            self._resource.add_sub_resource(sw_unique_id, sw_resource)
 
             for port in [port for port in switch["node-connector"]
                          if port["id"] not in used_ports
@@ -75,7 +80,7 @@ class ODLAutoloadFlow(object):
                     port_no = port["id"].split(":")[-1]
 
                 mac_addr = port.get("flow-node-inventory:hardware-address")
-                unique_id = "{}.{}".format(sw_, port_no)
+                unique_id = "{}.{}".format(sw_unique_id, port_no)
 
                 port_object = GenericPort(shell_name="",
                                           name=port_name.replace(":", "-"),
@@ -92,25 +97,14 @@ class ODLAutoloadFlow(object):
                 port_object.auto_negotiation = ""
                 port_object.adjacent = ""
                 sw_resource.add_sub_resource(port_no, port_object)
-                # 'module_model': '',
-                # 'version': '',
-                # 'serial_number': switch_index
-
-                # switch_name = 'SDN Switch {0}'.format(switch)
-                # model = 'OpenVSwitch'
-                # todo: check if we can create some specific classes for the SDN resources
-                # switch_object = Module(name=switch_name,
-                #                        model=model,
-                #                        relative_path=switch)
-                # self._add_resource(switch_object)
 
         result = AutoloadDetailsBuilder(self._resource).autoload_details()
         self._log_autoload_details(result)
         return result
 
     def _log_autoload_details(self, autoload_details):
-        """
-        Logging autoload details
+        """Log autoload details
+
         :param autoload_details:
         :return:
         """

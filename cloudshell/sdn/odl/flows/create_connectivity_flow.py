@@ -1,14 +1,19 @@
 class ODLCreateConnectivityFlow(object):
     def __init__(self, odl_client, logger):
+        """
+
+        :param cloudshell.sdn.odl.client.ODLClient odl_client:
+        :param logging.Logger logger:
+        """
         self._odl_client = odl_client
         self._logger = logger
 
     def execute_flow(self, vlan_id, access_ports, trunk_ports):
         """
 
-        :param vlan_id:
-        :param access_ports:
-        :param trunk_ports:
+        :param int vlan_id:
+        :param list[str] access_ports:
+        :param list[str] trunk_ports:
         :return:
         """
         tenant_name = "{}{}".format(self._odl_client.VTN_NAME_PREFIX, vlan_id)
@@ -19,6 +24,7 @@ class ODLCreateConnectivityFlow(object):
 
         for node_id, interface in self._odl_client.get_leaf_interfaces():
             phys_port_name = interface
+            # todo: replace symbols in interface in one place
             interface = "{}_{}".format(node_id, interface).replace("-", "_").replace(":", "_")
 
             old_iface = self._odl_client.get_interface(tenant_name=tenant_name,
