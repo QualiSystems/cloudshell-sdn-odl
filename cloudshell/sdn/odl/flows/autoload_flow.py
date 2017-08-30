@@ -44,7 +44,7 @@ class ODLAutoloadFlow(object):
         self._set_controller_details()
         # ports used in connections between switches
         used_ports = []
-        topo = self._odl_client.get_topology()
+        topo = self._odl_client._get_topology()
         switch_ids = self._odl_client.get_switches()
 
         for link in topo.get("link", []):
