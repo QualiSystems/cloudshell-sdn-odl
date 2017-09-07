@@ -1,5 +1,5 @@
 from cloudshell.sdn.runners.autoload_runner import SDNAutoloadRunner
-from cloudshell.sdn.odl.flows.autoload_flow import ODLAutoloadFlow
+from cloudshell.sdn.odl.flows import ODLAutoloadFlow
 
 
 class ODLAutoloadRunner(SDNAutoloadRunner):

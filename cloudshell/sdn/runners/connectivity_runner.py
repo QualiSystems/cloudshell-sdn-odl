@@ -1,3 +1,4 @@
+from abc import ABCMeta
 from abc import abstractproperty
 
 import jsonpickle
@@ -13,6 +14,8 @@ from cloudshell.networking.apply_connectivity.models.connectivity_result import 
 
 
 class SDNConnectivityRunner(ConnectivityOperationsInterface):
+    __metaclass__ = ABCMeta
+
     APPLY_CONNECTIVITY_CHANGES_ACTION_REQUIRED_ATTRIBUTE_LIST = ["type", "actionId",
                                                                  ("connectionParams", "mode"),
                                                                  ("actionTarget", "fullName")]
@@ -50,6 +53,7 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
         """
         switch_id = full_name.split("/")[-2]
         # todo: move ":" symbol replacing to one place
+        # TODO: MOVE it to ODL module !!!
         switch_id = switch_id.replace("openflow_", "openflow:")
         return switch_id
 
@@ -135,10 +139,21 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
                 else:
                     trunk_ports.append((switch_id, phys_port_name))
 
+            # todo: check this
+            qnq = False
+            c_tag = 0
+
+            for attribute in action.connectionParams.vlanServiceAttributes:
+                if attribute.attributeName.lower() == "qnq" and attribute.attributeValue.lower() == "true":
+                    qnq = True
+                if attribute.attributeName.lower() == "ctag":
+                    c_tag = attribute.attributeValue
+
             try:
                 self.create_connectivity_flow.execute_flow(vlan_id=vlan_id,
-                                                           access_ports=access_ports,
-                                                           trunk_ports=trunk_ports)
+                                                           qnq=qnq,
+                                                           c_tag=c_tag,
+                                                           access_ports=access_ports)
             except Exception:
                 for action in actions:
                     full_name = action.actionTarget.fullName

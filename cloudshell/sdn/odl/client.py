@@ -6,8 +6,9 @@ from requests.auth import HTTPBasicAuth
 
 
 class ODLClient(object):
-    VTN_NAME_PREFIX = "VTN_VLAN_"
-    VBRIDGE_NAME_PREFIX = "VBRINDGE_VLAN_"
+    VTN_NAME_PREFIX = "CS_VLAN_"
+    VTN_TRUNKS_NAME = "CS_TRUNKS"
+    VBRIDGE_NAME = "CS_VBRIDGE"
 
     def __init__(self, address, username, password, port=8181):
         """
@@ -106,34 +107,6 @@ class ODLClient(object):
         # leaf switches will have only one outgoing link or will haven't links at all
         return [node for node, out_links_count in graph.out_degree().items() if out_links_count <= 1]
 
-    def get_leaf_interfaces(self):
-        """Get leaf interfaces names
-
-        :rtype: list[tuple[str, str]]
-        """
-        used_ports = []
-        topo = self._get_topology()
-        switch_ids = self.get_switches()
-        result = []
-
-        for link in topo.get("link", []):
-            tp = link["destination"]["dest-node"]
-            op = link["source"]["source-node"]
-            if tp in switch_ids and op in switch_ids:
-                used_ports.append(link["source"]["source-tp"])
-                used_ports.append(link["destination"]["dest-tp"])
-
-        for switch_id in self.get_leaf_switches():
-            switch = self.get_switch(switch_id)
-
-            for port in [port for port in switch["node-connector"]
-                         if port["id"] not in used_ports
-                         and "local" not in port["id"].lower()]:
-
-                result.append((switch_id, port["flow-node-inventory:name"]))
-
-        return result
-
     def get_switches(self):
         """Get all switches names
 
@@ -227,7 +200,7 @@ class ODLClient(object):
         }
         self._do_post(path="restconf/operations/vtn-vinterface:remove-vinterface", json=data)
 
-    def map_port_to_interface(self, tenant_name, bridge_name, if_name, node_id, phys_port_name, vlan_id):
+    def map_port_to_interface(self, tenant_name, bridge_name, if_name, node_id, phys_port_name, vlan_id=0):
         """Map VTN interface to the physical port on the Open vSwitch
 
         :param str tenant_name:
@@ -269,6 +242,17 @@ class ODLClient(object):
         data = response.json()
         return data["vinterface"][0]
 
+    def get_vtn_vbridge(self, tenant_name, bridge_name):
+        """Get VTN vBridge data
+
+        :param str tenant_name:
+        :param str bridge_name:
+        :return:
+        """
+        response = self._do_get(path="restconf/operational/vtn:vtns/vtn/{}/vbridge/{}".format(tenant_name, bridge_name))
+        data = response.json()
+        return data.get("vbridge")[0]
+
     def vtn_access_interfaces_exists(self, tenant_name, bridge_name):
         """Check whether given vBridge contains access interfaces or not
 
@@ -276,12 +260,22 @@ class ODLClient(object):
         :param str bridge_name:
         :rtype: bool
         """
-        response = self._do_get(path="restconf/operational/vtn:vtns/vtn/{}/vbridge/{}".format(tenant_name, bridge_name))
-        data = response.json()
-        vbridge = data.get("vbridge")[0]
+        vbridge = self.get_vtn_vbridge(tenant_name=tenant_name, bridge_name=bridge_name)
 
         for interface in vbridge.get("vinterface", []):
             if interface.get("port-map-config", {}).get("vlan-id") == 0:
                 return True
 
         return False
+
+    def get_trunk_ports(self):
+        """Get configured trunk ports
+
+        :return:
+        """
+        vbridge = self.get_vtn_vbridge(tenant_name=self.VTN_TRUNKS_NAME, bridge_name=self.VBRIDGE_NAME)
+        import ipdb;ipdb.set_trace()
+        for interface in vbridge.get("vinterface", []):
+            pass
+
+        """(ODL) anthony@anthony-B85M-DS3H-A:/var/projects/cloudshell-sdn-odl/SDN_Opendaylight_Shell_Package/Resource Drivers - Python/Generic SDN Opendaylight Controller$ curl --user "admin":"admin" -H "Content-type: application/json" -X GET http://localhost:8181/restconf/operational/vtn:vtns/vtn/CS_TRUNKS/vbridge/CS_VBRIDGE | python -m json.tool"""

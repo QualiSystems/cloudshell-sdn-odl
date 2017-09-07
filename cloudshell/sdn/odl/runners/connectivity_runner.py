@@ -1,6 +1,6 @@
-from cloudshell.sdn.odl.flows.create_connectivity_flow import ODLCreateConnectivityFlow
-from cloudshell.sdn.odl.flows.remove_connectivity_flow import ODLRemoveConnectivityFlow
-from cloudshell.sdn.runners.connectivity_runner import SDNConnectivityRunner
+from cloudshell.sdn.odl.flows import ODLCreateConnectivityFlow
+from cloudshell.sdn.odl.flows import ODLRemoveConnectivityFlow
+from cloudshell.sdn.runners import SDNConnectivityRunner
 
 
 class ODLConnectivityRunner(SDNConnectivityRunner):
