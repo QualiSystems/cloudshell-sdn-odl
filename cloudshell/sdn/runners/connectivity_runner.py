@@ -86,7 +86,7 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
     def _get_json_request_deserializer(self, request):
         """Convert and validate JSON request into JsonRequestDeserializer object
 
-        :param dict request: json with all required action to configure or remove VLANs from certain port
+        :param str request: json with all required action to configure or remove VLANs from certain port
         :rtype: JsonRequestDeserializer
         """
         if request is None or request == "":
@@ -139,7 +139,6 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
                 else:
                     trunk_ports.append((switch_id, phys_port_name))
 
-            # todo: check this
             qnq = False
             c_tag = 0
 
@@ -219,7 +218,7 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
         """Handle apply connectivity changes request json, trigger add or remove VLAN methods,
 
         get response from them and create json response
-        :param dict request: json with all required action to configure or remove VLANs from certain port
+        :param str request: json with all required action to configure or remove VLANs from certain port
         :return Serialized DriverResponseRoot to json
         :rtype: json
         """

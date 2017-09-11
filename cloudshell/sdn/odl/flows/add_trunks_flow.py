@@ -11,7 +11,7 @@ class ODLAddTrunksFlow(object):
     def execute_flow(self, ports):
         """
 
-        :param dict[str, list] ports:
+        :param list[tuple[str, str]] ports:
         :return:
         """
         # todo: check if we need to add some prefix there !!!
@@ -19,17 +19,16 @@ class ODLAddTrunksFlow(object):
         self._odl_client.create_vbridge(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
                                         bridge_name=self._odl_client.VBRIDGE_NAME)
 
-        for node_id, ports_names in ports.iteritems():
-            for port_name in ports_names:
-                phys_port_name = port_name
-                port_name = "{}_{}".format(node_id, port_name).replace("-", "_").replace(":", "_")
+        for node_id, port_name in ports:
+            phys_port_name = port_name
+            port_name = "{}_{}".format(node_id, port_name).replace("-", "_").replace(":", "_")
 
-                self._odl_client.create_interface(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
-                                                  bridge_name=self._odl_client.VBRIDGE_NAME,
-                                                  if_name=port_name)
+            self._odl_client.create_interface(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
+                                              bridge_name=self._odl_client.VBRIDGE_NAME,
+                                              if_name=port_name)
 
-                self._odl_client.map_port_to_interface(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
-                                                       bridge_name=self._odl_client.VBRIDGE_NAME,
-                                                       if_name=port_name,
-                                                       node_id=node_id,
-                                                       phys_port_name=phys_port_name)
+            self._odl_client.map_port_to_interface(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
+                                                   bridge_name=self._odl_client.VBRIDGE_NAME,
+                                                   if_name=port_name,
+                                                   node_id=node_id,
+                                                   phys_port_name=phys_port_name)

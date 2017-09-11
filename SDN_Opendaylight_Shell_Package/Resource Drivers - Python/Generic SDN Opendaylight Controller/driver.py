@@ -51,6 +51,17 @@ class OpendaylightResourceDriver(ResourceDriverInterface, SDNResourceDriverInter
 
         return result
 
+    def _parse_ports(self, ports):
+        """Parse ports string into the list
+
+        :param str ports:
+        :rtype: list[tuple[str, str]]
+        """
+        if ports == "":
+            return []
+
+        return [tuple(port_pair.split("::")) for port_pair in ports.strip(";").split(";")]
+
     def add_trunk_ports(self, context, ports):
         """Mark given ports as a trunk ports on the ODL
 
@@ -61,6 +72,7 @@ class OpendaylightResourceDriver(ResourceDriverInterface, SDNResourceDriverInter
         logger = get_logger_with_thread_id(context)
         logger.info('Create Trunk Ports command started')
         api = get_api(context)
+        ports = self._parse_ports(ports)
 
         resource_config = GenericSDNResource.from_context(context)
         password = api.DecryptPassword(resource_config.password).Value
@@ -89,6 +101,7 @@ class OpendaylightResourceDriver(ResourceDriverInterface, SDNResourceDriverInter
         logger = get_logger_with_thread_id(context)
         logger.info('Remove Trunk Ports command started')
         api = get_api(context)
+        ports = self._parse_ports(ports)
 
         resource_config = GenericSDNResource.from_context(context)
         password = api.DecryptPassword(resource_config.password).Value

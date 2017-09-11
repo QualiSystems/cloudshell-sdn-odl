@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Driver Name="Generic SDN Opendaylight Controller" Version="2.0.0" MainClass="driver.OpendaylightResourceDriver" Description="">
-  <Layout>
-    <Category Name="Hidden Commands">
-        <Command Name="ApplyConnectivityChanges" DisplayName="ApplyConnectivityChanges" Tags="allow_unreserved">
+<Driver Name="Generic SDN Opendaylight Controller" Version="2.0.0" MainClass="driver.OpendaylightResourceDriver"
+        Description="">
+    <Layout>
+        <Category Name="Hidden Commands">
+            <Command Name="ApplyConnectivityChanges" DisplayName="ApplyConnectivityChanges" Tags="allow_unreserved">
+                <Parameters>
+                    <Parameter Name="request" Type="String" Mandatory="True" DefaultValue="" Description=""/>
+                </Parameters>
+            </Command>
+        </Category>
+        <Command Name="add_trunk_ports" DisplayName="Add Trunk Ports" Tags="">
             <Parameters>
-              <Parameter Name="request" Type="String" Mandatory = "True" DefaultValue="" Description=""/>
+                <Parameter Name="ports" Type="String" Mandatory="True" DisplayName="Trunk Ports" DefaultValue=""
+                           Description="Trunk Ports in the next format: openflow:1::eth1;openflow:1:eth2"/>
             </Parameters>
-          </Command>
-	</Category>
-      <!--<Command Name="Install_Static_Flows" DisplayName="Install Static Flows" Tags="">-->
-        <!--<Parameters>-->
-            <!--<Parameter Name="flow_name" Type="String" Mandatory = "True" DisplayName="Flow Name" DefaultValue=""  Description=""/>-->
-            <!--<Parameter Name="switch_id" Type="String" Mandatory = "True" DisplayName="Switch ID" DefaultValue=""  Description=""/>-->
-            <!--<Parameter Name="switch_port" Type="String" Mandatory = "True" DisplayName="Input Port" DefaultValue=""  Description=""/>-->
-        <!--</Parameters>-->
-      <!--</Command>-->
-  </Layout>
+        </Command>
+        <Command Name="remove_trunk_ports" DisplayName="Remove Trunk Ports" Tags="">
+            <Parameters>
+                <Parameter Name="ports" Type="String" Mandatory="True" DisplayName="Trunk Ports" DefaultValue=""
+                           Description="Trunk Ports in the next format: openflow:1::eth1;openflow:1:eth2"/>
+            </Parameters>
+        </Command>
+    </Layout>
 </Driver>

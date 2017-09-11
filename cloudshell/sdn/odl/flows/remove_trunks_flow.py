@@ -11,7 +11,7 @@ class ODLRemoveTrunksFlow(object):
     def execute_flow(self, ports):
         """
 
-        :param dict[str, list] ports:
+        :param list[tuple[str, str]] ports:
         :return:
         """
         # todo: check if we need to add some prefix there !!!
@@ -19,10 +19,9 @@ class ODLRemoveTrunksFlow(object):
         self._odl_client.create_vbridge(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
                                         bridge_name=self._odl_client.VBRIDGE_NAME)
 
-        for node_id, ports_names in ports.iteritems():
-            for port_name in ports_names:
-                port_name = "{}_{}".format(node_id, port_name).replace("-", "_").replace(":", "_")
+        for node_id, port_name in ports:
+            port_name = "{}_{}".format(node_id, port_name).replace("-", "_").replace(":", "_")
 
-                self._odl_client.delete_interface(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
-                                                  bridge_name=self._odl_client.VBRIDGE_NAME,
-                                                  if_name=port_name)
+            self._odl_client.delete_interface(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
+                                              bridge_name=self._odl_client.VBRIDGE_NAME,
+                                              if_name=port_name)

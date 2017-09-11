@@ -242,14 +242,21 @@ class ODLClient(object):
         data = response.json()
         return data["vinterface"][0]
 
-    def get_vtn_vbridge(self, tenant_name, bridge_name):
+    def get_vtn_vbridge(self, tenant_name, bridge_name, raise_for_status=True):
         """Get VTN vBridge data
 
         :param str tenant_name:
         :param str bridge_name:
+        :param bool raise_for_status:
         :return:
         """
-        response = self._do_get(path="restconf/operational/vtn:vtns/vtn/{}/vbridge/{}".format(tenant_name, bridge_name))
+        response = self._do_get(path="restconf/operational/vtn:vtns/vtn/{}/vbridge/{}".format(tenant_name, bridge_name),
+                                raise_for_status=raise_for_status)
+
+        if response.status_code == httplib.NOT_FOUND:
+            return
+
+        response.raise_for_status()
         data = response.json()
         return data.get("vbridge")[0]
 
@@ -271,11 +278,14 @@ class ODLClient(object):
     def get_trunk_ports(self):
         """Get configured trunk ports
 
-        :return:
+        :rtype: list[tuple[str, str]]
         """
-        vbridge = self.get_vtn_vbridge(tenant_name=self.VTN_TRUNKS_NAME, bridge_name=self.VBRIDGE_NAME)
-        import ipdb;ipdb.set_trace()
-        for interface in vbridge.get("vinterface", []):
-            pass
+        trunk_ports = []
+        vbridge = self.get_vtn_vbridge(tenant_name=self.VTN_TRUNKS_NAME,
+                                       bridge_name=self.VBRIDGE_NAME,
+                                       raise_for_status=False)
+        if vbridge is not None:
+            for interface in vbridge.get("vinterface", []):
+                trunk_ports.append((interface["port-map-config"]["node"], interface["port-map-config"]["port-name"]))
 
-        """(ODL) anthony@anthony-B85M-DS3H-A:/var/projects/cloudshell-sdn-odl/SDN_Opendaylight_Shell_Package/Resource Drivers - Python/Generic SDN Opendaylight Controller$ curl --user "admin":"admin" -H "Content-type: application/json" -X GET http://localhost:8181/restconf/operational/vtn:vtns/vtn/CS_TRUNKS/vbridge/CS_VBRIDGE | python -m json.tool"""
+        return trunk_ports
