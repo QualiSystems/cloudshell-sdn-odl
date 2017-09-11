@@ -12,11 +12,6 @@
                 <Rule Name="Configuration"/>
             </Rules>
         </AttributeInfo>
-        <AttributeInfo Name="Address" Type="String" DefaultValue="" IsReadOnly="false">
-            <Rules>
-                <Rule Name="Configuration"/>
-            </Rules>
-        </AttributeInfo>
         <AttributeInfo Name="Port" Type="String" DefaultValue="" IsReadOnly="false">
             <Rules>
                 <Rule Name="Configuration"/>
@@ -170,9 +165,6 @@
                         <AttachedAttribute Name="Model" IsOverridable="true" IsLocal="true">
                             <AllowedValues/>
                         </AttachedAttribute>
-                        <AttachedAttribute Name="Address" IsOverridable="true" IsLocal="true">
-                            <AllowedValues/>
-                        </AttachedAttribute>
                         <AttachedAttribute Name="Port" IsOverridable="true" IsLocal="true">
                             <AllowedValues/>
                         </AttachedAttribute>
@@ -186,7 +178,6 @@
                         <AttributeValue Name="Vendor" Value=""/>
                         <AttributeValue Name="Location" Value=""/>
                         <AttributeValue Name="Model" Value=""/>
-                        <AttributeValue Name="Address" Value=""/>
                         <AttributeValue Name="Port" Value=""/>
                     </AttributeValues>
                     <ParentModels/>
