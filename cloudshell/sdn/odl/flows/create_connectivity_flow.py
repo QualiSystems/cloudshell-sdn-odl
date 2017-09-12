@@ -46,13 +46,15 @@ class ODLCreateConnectivityFlow(object):
         self._odl_client.create_vtn(tenant_name=tenant_name)
         self._odl_client.create_vbridge(tenant_name=tenant_name, bridge_name=self._odl_client.VBRIDGE_NAME)
 
-        self._add_ports_to_vtn(tenant_name=tenant_name,
-                               vlan_id=0,
-                               ports=access_ports)
-
         if qnq:
-            vlan_id = c_tag
+            self._add_ports_to_vtn(tenant_name=tenant_name,
+                                   vlan_id=c_tag,
+                                   ports=access_ports)
+        else:
+            self._add_ports_to_vtn(tenant_name=tenant_name,
+                                   vlan_id=0,
+                                   ports=access_ports)
 
-        self._add_ports_to_vtn(tenant_name=tenant_name,
-                               vlan_id=vlan_id,
-                               ports=self._odl_client.get_trunk_ports())
+            self._add_ports_to_vtn(tenant_name=tenant_name,
+                                   vlan_id=vlan_id,
+                                   ports=self._odl_client.get_trunk_ports())
