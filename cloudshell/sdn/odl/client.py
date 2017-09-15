@@ -223,19 +223,20 @@ class ODLClient(object):
         }
         self._do_post(path="restconf/operations/vtn-port-map:set-port-map", json=data)
 
-    def get_interface(self, tenant_name, bridge_name, if_name):
+    def get_interface(self, tenant_name, bridge_name, if_name, raise_for_status=True):
         """Get VTN interface data
 
         :param str tenant_name:
         :param str bridge_name:
         :param str if_name:
+        :param bool raise_for_status:
         :rtype: dict
         """
         response = self._do_get(path="restconf/operational/vtn:vtns/vtn/{}/vbridge/{}/vinterface/{}"
                                 .format(tenant_name, bridge_name, if_name),
-                                raise_for_status=False)
+                                raise_for_status=raise_for_status)
 
-        if response.status_code == httplib.NOT_FOUND:
+        if not raise_for_status and response.status_code == httplib.NOT_FOUND:
             return
 
         response.raise_for_status()
@@ -253,7 +254,7 @@ class ODLClient(object):
         response = self._do_get(path="restconf/operational/vtn:vtns/vtn/{}/vbridge/{}".format(tenant_name, bridge_name),
                                 raise_for_status=raise_for_status)
 
-        if response.status_code == httplib.NOT_FOUND:
+        if not raise_for_status and response.status_code == httplib.NOT_FOUND:
             return
 
         response.raise_for_status()
@@ -289,3 +290,21 @@ class ODLClient(object):
                 trunk_ports.append((interface["port-map-config"]["node"], interface["port-map-config"]["port-name"]))
 
         return trunk_ports
+
+    def delete_vbridge(self, tenant_name, bridge_name, raise_for_status=True):
+        """Delete vBridge object from the given VTN
+
+        :param str tenant_name:
+        :param str bridge_name:
+        :param bool raise_for_status:
+        :return:
+        """
+        data = {
+            "input": {
+                "tenant-name": tenant_name,
+                "bridge-name": bridge_name,
+            }
+        }
+        self._do_post(path="restconf/operations/vtn-vbridge:remove-vbridge",
+                      json=data,
+                      raise_for_status=raise_for_status)

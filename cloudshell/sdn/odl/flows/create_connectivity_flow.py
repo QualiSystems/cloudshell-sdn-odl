@@ -51,6 +51,11 @@ class ODLCreateConnectivityFlow(object):
                                    vlan_id=c_tag,
                                    ports=access_ports)
         else:
+            # remove trunks vBridge for given VLAN if exists
+            self._odl_client.delete_vbridge(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
+                                            bridge_name=str(vlan_id),
+                                            raise_for_status=False)
+
             self._add_ports_to_vtn(tenant_name=tenant_name,
                                    vlan_id=0,
                                    ports=access_ports)

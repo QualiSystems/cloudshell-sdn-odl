@@ -5,7 +5,7 @@ from driver import OpendaylightResourceDriver
 from mock import patch
 
 request = """{"driverRequest": {"actions": [{"connectionId": "09faa654-9189-4b99-973c-01f5222f1db9",
-                                              "connectionParams": {"vlanId": "2100", "mode": "Access",
+                                              "connectionParams": {"vlanId": "2000", "mode": "Access",
                                                                    "vlanServiceAttributes": [
                                                                        {"attributeName": "Allocation Ranges",
                                                                         "attributeValue": "2-4094",
@@ -41,7 +41,7 @@ request = """{"driverRequest": {"actions": [{"connectionId": "09faa654-9189-4b99
                                                                "type": "actionTarget"}, "customActionAttributes": [],
                                               "type": "setVlan"},
                                              {"connectionId": "09faa654-9189-4b99-973c-01f5222f1db9",
-                                              "connectionParams": {"vlanId": "2100", "mode": "Access",
+                                              "connectionParams": {"vlanId": "2000", "mode": "Access",
                                                                    "vlanServiceAttributes": [
                                                                        {"attributeName": "Allocation Ranges",
                                                                         "attributeValue": "2-4094",
@@ -65,7 +65,7 @@ request = """{"driverRequest": {"actions": [{"connectionId": "09faa654-9189-4b99
                                                                         "attributeValue": "",
                                                                         "type": "vlanServiceAttribute"},
                                                                        {"attributeName": "QnQ",
-                                                                        "attributeValue": "True",
+                                                                        "attributeValue": "False",
                                                                         "type": "vlanServiceAttribute"},
                                                                        {"attributeName": "CTag", "attributeValue": "1501",
                                                                         "type": "vlanServiceAttribute"}],
@@ -73,7 +73,7 @@ request = """{"driverRequest": {"actions": [{"connectionId": "09faa654-9189-4b99
                                                  {"attributeName": "Selected Network", "attributeValue": "2",
                                                   "type": "connectorAttribute"}],
                                               "actionId": "09faa654-9189-4b99-973c-01f5222f1db9_884f8bbc-7984-4db6-ae10-574cfa7b31b2",
-                                              "actionTarget": {"fullName": "SDN ODL2/openflow:1/s1-eth4",
+                                              "actionTarget": {"fullName": "SDN ODL2/openflow:1/s1-eth3",
                                                                "fullAddress": "192.168.42.157/CH2/P2",
                                                                "type": "actionTarget"}, "customActionAttributes": [],
                                               "type": "setVlan"}]}}"""
@@ -144,6 +144,7 @@ if __name__ == '__main__':
         out = driver.get_inventory(context)
         #
         driver.add_trunk_ports(context=context, ports="openflow:1::s1-eth5;openflow:1::s1-eth6")
+        # driver.add_trunk_ports(context=context, ports="openflow:1::s1-eth6")
 
         # todo: CS_TRUNKS - VTN add disabled flag for 0 VLAN !
         #
@@ -152,12 +153,12 @@ if __name__ == '__main__':
         #     "openflow:2": ["s1-eth1"]
         # })
 
-        # driver.ApplyConnectivityChanges(context=context, request=request)
+        driver.ApplyConnectivityChanges(context=context, request=request)
         # print(inv)
         # out = driver.save(context, '', '', None)
         # out = driver.restore(context, 'ftp://junos:junos@192.168.85.23/dsada-running-040117-144312', None, None, None)
         # out = driver.load_firmware(context, 'dsadas', None)
         # out = driver.get_inventory(context)>
-        out = driver.ApplyConnectivityChanges(context, request)
+        # out = driver.ApplyConnectivityChanges(context, request)
 
         print(out)
