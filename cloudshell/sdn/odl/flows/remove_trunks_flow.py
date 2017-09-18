@@ -14,14 +14,11 @@ class ODLRemoveTrunksFlow(object):
         :param list[tuple[str, str]] ports:
         :return:
         """
-        # todo: check if we need to add some prefix there !!!
         self._odl_client.create_vtn(tenant_name=self._odl_client.VTN_TRUNKS_NAME)
         self._odl_client.create_vbridge(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
                                         bridge_name=self._odl_client.VBRIDGE_NAME)
 
         for node_id, port_name in ports:
             port_name = "{}_{}".format(node_id, port_name).replace("-", "_").replace(":", "_")
-
-            self._odl_client.delete_interface(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
-                                              bridge_name=self._odl_client.VBRIDGE_NAME,
-                                              if_name=port_name)
+            self._odl_client.delete_interface_from_all_vbridges(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
+                                                                if_name=port_name)

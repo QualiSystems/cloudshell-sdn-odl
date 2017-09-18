@@ -183,12 +183,13 @@ class ODLClient(object):
         }
         self._do_post(path="restconf/operations/vtn-vinterface:update-vinterface", json=data)
 
-    def delete_interface(self, tenant_name, bridge_name, if_name):
+    def delete_interface(self, tenant_name, bridge_name, if_name, raise_for_status=True):
         """Delete interface object from the given VTN and vBridge
 
         :param str tenant_name:
         :param str bridge_name:
         :param str if_name:
+        :param bool raise_for_status:
         :return:
         """
         data = {
@@ -198,7 +199,10 @@ class ODLClient(object):
                 "interface-name": if_name
             }
         }
-        self._do_post(path="restconf/operations/vtn-vinterface:remove-vinterface", json=data)
+
+        self._do_post(path="restconf/operations/vtn-vinterface:remove-vinterface",
+                      json=data,
+                      raise_for_status=raise_for_status)
 
     def map_port_to_interface(self, tenant_name, bridge_name, if_name, node_id, phys_port_name, vlan_id=0):
         """Map VTN interface to the physical port on the Open vSwitch
@@ -308,3 +312,38 @@ class ODLClient(object):
         self._do_post(path="restconf/operations/vtn-vbridge:remove-vbridge",
                       json=data,
                       raise_for_status=raise_for_status)
+
+    def get_vtn(self, tenant_name, raise_for_status=True):
+        """Get VTN by its name
+
+        :param str tenant_name:
+        :param bool raise_for_status:
+        :return:
+        """
+        response = self._do_get(path="restconf/operational/vtn:vtns/vtn/{}".format(tenant_name),
+                                raise_for_status=raise_for_status)
+
+        if not raise_for_status and response.status_code == httplib.NOT_FOUND:
+            return
+
+        response.raise_for_status()
+        data = response.json()
+        return data.get("vtn")[0]
+
+    def delete_interface_from_all_vbridges(self, tenant_name, if_name):
+        """Delete interface from all vBridges in given VTN
+
+        :param str tenant_name:
+        :param str if_name:
+        :return:
+        """
+        vtn = self.get_vtn(tenant_name=tenant_name, raise_for_status=False)
+
+        if vtn is not None:
+            for vbridge in vtn.get("vbridge", []):
+                for interface in vbridge.get("vinterface", []):
+                    if interface["name"] == if_name:
+                        self.delete_interface(tenant_name=tenant_name,
+                                              bridge_name=vbridge["name"],
+                                              if_name=interface["name"])
+                        break

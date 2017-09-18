@@ -143,22 +143,19 @@ if __name__ == '__main__':
             'DecryptPassword': lambda self, pw: type('Password', (object,), {'Value': pw})()})()
         out = driver.get_inventory(context)
         #
-        driver.add_trunk_ports(context=context, ports="openflow:1::s1-eth5;openflow:1::s1-eth6")
+        # driver.add_trunk_ports(context=context, ports="openflow:1::s1-eth5;openflow:1::s1-eth6")
         # driver.add_trunk_ports(context=context, ports="openflow:1::s1-eth6")
 
         # todo: CS_TRUNKS - VTN add disabled flag for 0 VLAN !
         #
-        # driver.remove_trunk_ports(context=context, ports={
-        #     "openflow:1": ["s1-eth2"],
-        #     "openflow:2": ["s1-eth1"]
-        # })
+        driver.remove_trunk_ports(context=context, ports="openflow:1::s1-eth5;")
 
-        driver.ApplyConnectivityChanges(context=context, request=request)
+        # driver.ApplyConnectivityChanges(context=context, request=request)
         # print(inv)
         # out = driver.save(context, '', '', None)
         # out = driver.restore(context, 'ftp://junos:junos@192.168.85.23/dsada-running-040117-144312', None, None, None)
         # out = driver.load_firmware(context, 'dsadas', None)
-        # out = driver.get_inventory(context)>
+        # out = driver.get_inventory(context)
         # out = driver.ApplyConnectivityChanges(context, request)
 
         print(out)
