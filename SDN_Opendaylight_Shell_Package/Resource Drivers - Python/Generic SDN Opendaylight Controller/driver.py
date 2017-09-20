@@ -158,7 +158,7 @@ class OpendaylightResourceDriver(ResourceDriverInterface, SDNResourceDriverInter
         :param ResourceCommandContext context: ResourceCommandContext object with all Resource Attributes inside
         :param str node_id:
         :param int table_id:
-        :param int flow_id:
+        :param str flow_id:
         :return: response
         :rtype: str
         """

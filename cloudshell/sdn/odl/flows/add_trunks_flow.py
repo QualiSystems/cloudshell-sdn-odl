@@ -32,7 +32,7 @@ class ODLAddTrunksFlow(object):
                                                    if_name=port_name,
                                                    node_id=node_id,
                                                    phys_port_name=phys_port_name)
-
+            # todo: get in_port from the previous command
             # todo: get in_port value "openflow:1:1", generate unique flow_id, move priotity to constant
             self._odl_client.create_ctrl_flow(node_id=node_id,
                                               table_id=0,

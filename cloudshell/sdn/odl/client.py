@@ -142,7 +142,9 @@ class ODLClient(object):
 
         :param str node_id:
         :param int table_id:
-        :param int flow_id:
+        :param str flow_id:
+        :param str in_port:
+        :param int priority:
         :return:
         """
         data = {
@@ -180,7 +182,7 @@ class ODLClient(object):
 
         :param str node_id:
         :param int table_id:
-        :param int flow_id:
+        :param str flow_id:
         :return:
         """
         self._do_delete(path="restconf/config/opendaylight-inventory:nodes/node/{}/table/{}/flow/{}".format(

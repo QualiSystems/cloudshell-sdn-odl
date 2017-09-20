@@ -13,7 +13,7 @@ class ODLRemoveOpenflowFlow(object):
 
         :param str node_id:
         :param int table_id:
-        :param int flow_id:
+        :param str flow_id:
         :return:
         """
         self._odl_client.delete_openflow(node_id=node_id, table_id=table_id, flow_id=flow_id)

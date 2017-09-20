@@ -21,7 +21,7 @@ class SDNRemoveOpenflowRunner(object):
 
         :param str node_id:
         :param int table_id:
-        :param int flow_id:
+        :param str flow_id:
         :return:
         """
         return self.remove_openflow_flow.execute_flow(node_id=node_id, table_id=table_id, flow_id=flow_id)

@@ -8,6 +8,13 @@
                     <Parameter Name="request" Type="String" Mandatory="True" DefaultValue="" Description=""/>
                 </Parameters>
             </Command>
+            <Command Name="remove_openflow" DisplayName="Remove Openflow" Tags="allow_unreserved">
+                <Parameters>
+                    <Parameter Name="node_id" DisplayName="Node ID" Type="String" Mandatory="True" DefaultValue="" Description=""/>
+                    <Parameter Name="table_id" DisplayName="Table ID" Type="String" Mandatory="True" DefaultValue="0" Description=""/>
+                    <Parameter Name="flow_id" DisplayName="Flow ID" Type="String" Mandatory="True" DefaultValue="" Description=""/>
+                </Parameters>
+            </Command>
         </Category>
         <Command Name="add_trunk_ports" DisplayName="Add Trunk Ports" Tags="">
             <Parameters>
