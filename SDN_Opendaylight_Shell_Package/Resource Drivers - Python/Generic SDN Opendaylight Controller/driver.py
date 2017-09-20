@@ -7,6 +7,7 @@ from cloudshell.shell.core.driver_utils import GlobalLock
 from cloudshell.sdn.odl.runners import ODLAutoloadRunner
 from cloudshell.sdn.odl.runners import ODLConnectivityRunner
 from cloudshell.sdn.odl.runners import ODLAddRemoveTrunksRunner
+from cloudshell.sdn.odl.runners import ODLRemoveOpenflowRunner
 from cloudshell.sdn.config_attrs_structure import GenericSDNResource
 from cloudshell.sdn.odl.client import ODLClient
 
@@ -147,5 +148,36 @@ class OpendaylightResourceDriver(ResourceDriverInterface, SDNResourceDriverInter
 
         response = autoload_operations.discover()
         logger.info('Autoload completed')
+
+        return response
+
+    @GlobalLock.lock
+    def remove_openflow(self, context, node_id, table_id, flow_id):
+        """Remove openflow from controller by its id
+
+        :param ResourceCommandContext context: ResourceCommandContext object with all Resource Attributes inside
+        :param str node_id:
+        :param int table_id:
+        :param int flow_id:
+        :return: response
+        :rtype: str
+        """
+        logger = get_logger_with_thread_id(context)
+        logger.info('Remove openflow command started')
+        api = get_api(context)
+
+        resource_config = GenericSDNResource.from_context(context)
+        password = api.DecryptPassword(resource_config.password).Value
+
+        odl_client = ODLClient(address=resource_config.address,
+                               username=resource_config.user,
+                               port=int(resource_config.port),
+                               password=password)
+
+        autoload_operations = ODLRemoveOpenflowRunner(odl_client=odl_client,
+                                                      logger=logger)
+
+        response = autoload_operations.remove_openflow(node_id=node_id, table_id=table_id, flow_id=flow_id)
+        logger.info('Remove openflow command completed')
 
         return response

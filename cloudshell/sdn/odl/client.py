@@ -125,6 +125,17 @@ class ODLClient(object):
         data = response.json()
         return data["node"][0]
 
+    def delete_openflow(self, node_id, table_id, flow_id):
+        """Delete Openflow entry from the controller by its id
+
+        :param str node_id:
+        :param int table_id:
+        :param int flow_id:
+        :return:
+        """
+        self._do_delete(path="/restconf/config/opendaylight-inventory:nodes/node/{}/table/{}/flow/{}".format(
+            node_id, table_id, flow_id))
+
     def create_vtn(self, tenant_name):
         """Create VTN object on the controller
 
