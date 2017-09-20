@@ -49,6 +49,18 @@ class ODLClient(object):
         raise_for_status and resp.raise_for_status()
         return resp
 
+    def _do_put(self, path, raise_for_status=True, **kwargs):
+        """Basic PUT request client method
+
+        :param str path: path for the request
+        :param dict kwargs: additional kwarg that would be passed to the requests lib
+        :rtype: requests.Response
+        """
+        url = "{}/{}".format(self._base_url, path)
+        resp = requests.post(url=url, auth=self._auth, headers=self._headers, **kwargs)
+        raise_for_status and resp.raise_for_status()
+        return resp
+
     def _do_delete(self, path, raise_for_status=True, **kwargs):
         """Basic DELETE request client method
 
@@ -125,6 +137,44 @@ class ODLClient(object):
         data = response.json()
         return data["node"][0]
 
+    def create_ctrl_flow(self, node_id, table_id, flow_id, in_port, priority):
+        """Create output CONTROLLER action flow
+
+        :param str node_id:
+        :param int table_id:
+        :param int flow_id:
+        :return:
+        """
+        data = {
+            "flow":
+                {
+                    "id": flow_id,
+                    "instructions": {
+                        "instruction": {
+                            "order": "0",
+                            "apply-actions": {
+                                "action": [
+                                    {
+                                        "order": 0,
+                                        "output-action": {
+                                            "max-length": 65535,
+                                            "output-node-connector": "CONTROLLER"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "match": {
+                        "in-port": in_port
+                    },
+                    "priority": priority,
+                    "table_id": table_id
+            }
+        }
+        self._do_put(path="restconf/config/opendaylight-inventory:nodes/node/openflow:1/table/{}/flow/{}"
+                     .format(node_id, table_id, flow_id), json=data)
+
     def delete_openflow(self, node_id, table_id, flow_id):
         """Delete Openflow entry from the controller by its id
 
@@ -133,7 +183,7 @@ class ODLClient(object):
         :param int flow_id:
         :return:
         """
-        self._do_delete(path="/restconf/config/opendaylight-inventory:nodes/node/{}/table/{}/flow/{}".format(
+        self._do_delete(path="restconf/config/opendaylight-inventory:nodes/node/{}/table/{}/flow/{}".format(
             node_id, table_id, flow_id))
 
     def create_vtn(self, tenant_name):
