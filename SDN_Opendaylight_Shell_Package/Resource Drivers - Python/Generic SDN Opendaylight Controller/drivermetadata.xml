@@ -8,13 +8,6 @@
                     <Parameter Name="request" Type="String" Mandatory="True" DefaultValue="" Description=""/>
                 </Parameters>
             </Command>
-            <Command Name="remove_openflow" DisplayName="Remove Openflow" Tags="allow_unreserved">
-                <Parameters>
-                    <Parameter Name="node_id" DisplayName="Node ID" Type="String" Mandatory="True" DefaultValue="" Description=""/>
-                    <Parameter Name="table_id" DisplayName="Table ID" Type="String" Mandatory="True" DefaultValue="0" Description=""/>
-                    <Parameter Name="flow_id" DisplayName="Flow ID" Type="String" Mandatory="True" DefaultValue="" Description=""/>
-                </Parameters>
-            </Command>
         </Category>
         <Command Name="add_trunk_ports" DisplayName="Add Trunk Ports" Tags="">
             <Parameters>
@@ -26,6 +19,16 @@
             <Parameters>
                 <Parameter Name="ports" Type="String" Mandatory="True" DisplayName="Trunk Ports" DefaultValue=""
                            Description="Trunk Ports in the next format: openflow:1::eth1;openflow:1:eth2"/>
+            </Parameters>
+        </Command>
+        <Command Name="remove_openflow" DisplayName="Remove Openflow" Tags="allow_unreserved">
+            <Parameters>
+                <Parameter Name="node_id" DisplayName="Node ID" Type="String" Mandatory="True" DefaultValue=""
+                           Description=""/>
+                <Parameter Name="table_id" DisplayName="Table ID" Type="String" Mandatory="True" DefaultValue="0"
+                           Description=""/>
+                <Parameter Name="flow_id" DisplayName="Flow ID" Type="String" Mandatory="True" DefaultValue=""
+                           Description=""/>
             </Parameters>
         </Command>
     </Layout>
