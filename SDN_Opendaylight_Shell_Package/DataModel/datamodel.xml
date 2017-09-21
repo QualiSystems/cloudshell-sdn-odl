@@ -17,53 +17,6 @@
                 <Rule Name="Configuration"/>
             </Rules>
         </AttributeInfo>
-        <AttributeInfo Name="System Name" Type="String" DefaultValue="" IsReadOnly="false">
-            <Rules>
-                <Rule Name="Configuration"/>
-            </Rules>
-        </AttributeInfo>
-        <AttributeInfo Name="Contact Name" Type="String" DefaultValue="" IsReadOnly="false">
-            <Rules>
-                <Rule Name="Configuration"/>
-            </Rules>
-        </AttributeInfo>
-
-        <AttributeInfo Name="OS Version" Type="String" DefaultValue="" IsReadOnly="true">
-            <Rules Override="false">
-                <Rule Name="Setting"/>
-                <Rule Name="Available For Abstract Resources"/>
-            </Rules>
-        </AttributeInfo>
-        <AttributeInfo Name="Version" Type="String" DefaultValue="" IsReadOnly="true">
-            <Rules Override="false">
-                <Rule Name="Setting"/>
-                <Rule Name="Available For Abstract Resources"/>
-            </Rules>
-        </AttributeInfo>
-        <AttributeInfo Name="Vendor" Type="String" DefaultValue="" IsReadOnly="true">
-            <Rules Override="false">
-                <Rule Name="Setting"/>
-                <Rule Name="Available For Abstract Resources"/>
-            </Rules>
-        </AttributeInfo>
-        <AttributeInfo Name="Location" Type="String" DefaultValue="" IsReadOnly="true">
-            <Rules Override="false">
-                <Rule Name="Setting"/>
-                <Rule Name="Available For Abstract Resources"/>
-            </Rules>
-        </AttributeInfo>
-        <AttributeInfo Name="Model" Type="String" DefaultValue="" IsReadOnly="true">
-            <Rules Override="false">
-                <Rule Name="Setting"/>
-                <Rule Name="Available For Abstract Resources"/>
-            </Rules>
-        </AttributeInfo>
-        <AttributeInfo Name="Serial Number" Type="String" DefaultValue="" IsReadOnly="true">
-            <Rules Override="false">
-                <Rule Name="Setting"/>
-                <Rule Name="Available For Abstract Resources"/>
-            </Rules>
-        </AttributeInfo>
         <AttributeInfo Name="MAC Address" Type="String" DefaultValue="" IsReadOnly="true">
             <Rules Override="false">
                 <Rule Name="Setting"/>
@@ -147,24 +100,6 @@
                         <AttachedAttribute Name="Password" IsOverridable="true" IsLocal="true">
                             <AllowedValues/>
                         </AttachedAttribute>
-                        <AttachedAttribute Name="System Name" IsOverridable="true" IsLocal="true">
-                            <AllowedValues/>
-                        </AttachedAttribute>
-                        <AttachedAttribute Name="Contact Name" IsOverridable="true" IsLocal="true">
-                            <AllowedValues/>
-                        </AttachedAttribute>
-                        <AttachedAttribute Name="OS Version" IsOverridable="true" IsLocal="true">
-                            <AllowedValues/>
-                        </AttachedAttribute>
-                        <AttachedAttribute Name="Vendor" IsOverridable="true" IsLocal="true">
-                            <AllowedValues/>
-                        </AttachedAttribute>
-                        <AttachedAttribute Name="Location" IsOverridable="true" IsLocal="true">
-                            <AllowedValues/>
-                        </AttachedAttribute>
-                        <AttachedAttribute Name="Model" IsOverridable="true" IsLocal="true">
-                            <AllowedValues/>
-                        </AttachedAttribute>
                         <AttachedAttribute Name="Port" IsOverridable="true" IsLocal="true">
                             <AllowedValues/>
                         </AttachedAttribute>
@@ -172,12 +107,6 @@
                     <AttributeValues>
                         <AttributeValue Name="User" Value=""/>
                         <AttributeValue Name="Password" Value=""/>
-                        <AttributeValue Name="System Name" Value=""/>
-                        <AttributeValue Name="Contact Name" Value=""/>
-                        <AttributeValue Name="OS Version" Value=""/>
-                        <AttributeValue Name="Vendor" Value=""/>
-                        <AttributeValue Name="Location" Value=""/>
-                        <AttributeValue Name="Model" Value=""/>
                         <AttributeValue Name="Port" Value=""/>
                     </AttributeValues>
                     <ParentModels/>
@@ -198,22 +127,6 @@
             <AttributeValues/>
             <Models>
                 <ResourceModel Name="OpenVSwitch" Description="" SupportsConcurrentCommands="false">
-                    <AttachedAttributes>
-                        <AttachedAttribute Name="Serial Number" IsOverridable="true" IsLocal="true">
-                            <AllowedValues/>
-                        </AttachedAttribute>
-                        <AttachedAttribute Name="Version" IsOverridable="true" IsLocal="true">
-                            <AllowedValues/>
-                        </AttachedAttribute>
-                        <AttachedAttribute Name="Model" IsOverridable="true" IsLocal="true">
-                            <AllowedValues/>
-                        </AttachedAttribute>
-                    </AttachedAttributes>
-                    <AttributeValues>
-                        <AttributeValue Name="Serial Number" Value=""/>
-                        <AttributeValue Name="Version" Value=""/>
-                        <AttributeValue Name="Model" Value=""/>
-                    </AttributeValues>
                     <ParentModels>
                         <ParentModelName>SDN ODL Controller</ParentModelName>
                     </ParentModels>

@@ -31,17 +31,7 @@ class ODLAutoloadFlow(object):
                                           name="ODL Controller",
                                           unique_id="ODL Controller")
 
-    def _set_controller_details(self):
-        """Get root element attributes"""
-        self._resource.contact_name = ""
-        self._resource.system_name = ""
-        self._resource.location = ""
-        self._resource.os_version = ""
-        self._resource.model = ""
-        self._resource.vendor = "Opendaylight"
-
     def execute_flow(self):
-        self._set_controller_details()
         # ports used in connections between switches
         used_ports = []
         topo = self._odl_client._get_topology()
