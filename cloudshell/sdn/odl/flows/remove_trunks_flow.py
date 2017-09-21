@@ -22,3 +22,5 @@ class ODLRemoveTrunksFlow(object):
             port_name = "{}_{}".format(node_id, port_name).replace("-", "_").replace(":", "_")
             self._odl_client.delete_interface_from_all_vbridges(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
                                                                 if_name=port_name)
+
+            self._odl_client.delete_ctrl_flow(node_id=node_id, flow_id=port_name, raise_for_status=False)

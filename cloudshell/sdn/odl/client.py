@@ -9,6 +9,8 @@ class ODLClient(object):
     VTN_NAME_PREFIX = "CS_VLAN_"
     VTN_TRUNKS_NAME = "CS_TRUNKS"
     VBRIDGE_NAME = "CS_VBRIDGE"
+    TRUNK_FLOW_PRIORITY = 9
+    DEFAULT_FLOW_TABLE = 0
 
     def __init__(self, address, username, password, port=8181):
         """
@@ -57,7 +59,7 @@ class ODLClient(object):
         :rtype: requests.Response
         """
         url = "{}/{}".format(self._base_url, path)
-        resp = requests.post(url=url, auth=self._auth, headers=self._headers, **kwargs)
+        resp = requests.put(url=url, auth=self._auth, headers=self._headers, **kwargs)
         raise_for_status and resp.raise_for_status()
         return resp
 
@@ -137,7 +139,7 @@ class ODLClient(object):
         data = response.json()
         return data["node"][0]
 
-    def create_ctrl_flow(self, node_id, table_id, flow_id, in_port, priority):
+    def create_ctrl_flow(self, node_id, flow_id, in_port, priority, table_id=DEFAULT_FLOW_TABLE):
         """Create output CONTROLLER action flow
 
         :param str node_id:
@@ -148,45 +150,47 @@ class ODLClient(object):
         :return:
         """
         data = {
-            "flow":
-                {
-                    "id": flow_id,
-                    "instructions": {
-                        "instruction": {
-                            "order": "0",
-                            "apply-actions": {
-                                "action": [
-                                    {
-                                        "order": 0,
-                                        "output-action": {
-                                            "max-length": 65535,
-                                            "output-node-connector": "CONTROLLER"
-                                        }
+            "flow": {
+                "id": flow_id,
+                "instructions": {
+                    "instruction": {
+                        "order": "0",
+                        "apply-actions": {
+                            "action": [
+                                {
+                                    "order": 0,
+                                    "output-action": {
+                                        "max-length": 65535,
+                                        "output-node-connector": "CONTROLLER"
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
-                    },
-                    "match": {
-                        "in-port": in_port
-                    },
-                    "priority": priority,
-                    "table_id": table_id
+                    }
+                },
+                "match": {
+                    "in-port": in_port
+                },
+                "priority": priority,
+                "table_id": table_id
             }
         }
-        self._do_put(path="restconf/config/opendaylight-inventory:nodes/node/openflow:1/table/{}/flow/{}"
-                     .format(node_id, table_id, flow_id), json=data)
+        self._do_put(path="restconf/config/opendaylight-inventory:nodes/node/{}/table/{}/flow/{}"
+                     .format(node_id, table_id, flow_id),
+                     json=data)
 
-    def delete_openflow(self, node_id, table_id, flow_id):
+    def delete_ctrl_flow(self, node_id, flow_id, table_id=DEFAULT_FLOW_TABLE, raise_for_status=True):
         """Delete Openflow entry from the controller by its id
 
         :param str node_id:
-        :param int table_id:
         :param str flow_id:
+        :param int table_id:
+        :param bool raise_for_status:
         :return:
         """
         self._do_delete(path="restconf/config/opendaylight-inventory:nodes/node/{}/table/{}/flow/{}".format(
-            node_id, table_id, flow_id))
+            node_id, table_id, flow_id),
+            raise_for_status=raise_for_status)
 
     def create_vtn(self, tenant_name):
         """Create VTN object on the controller

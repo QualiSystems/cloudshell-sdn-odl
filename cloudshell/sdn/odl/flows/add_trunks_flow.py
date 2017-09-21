@@ -14,7 +14,6 @@ class ODLAddTrunksFlow(object):
         :param list[tuple[str, str]] ports:
         :return:
         """
-        # todo: check if we need to add some prefix there !!!
         self._odl_client.create_vtn(tenant_name=self._odl_client.VTN_TRUNKS_NAME)
         self._odl_client.create_vbridge(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
                                         bridge_name=self._odl_client.VBRIDGE_NAME)
@@ -32,10 +31,14 @@ class ODLAddTrunksFlow(object):
                                                    if_name=port_name,
                                                    node_id=node_id,
                                                    phys_port_name=phys_port_name)
-            # todo: get in_port from the previous command
-            # todo: get in_port value "openflow:1:1", generate unique flow_id, move priotity to constant
+
+            iface = self._odl_client.get_interface(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
+                                                   bridge_name=self._odl_client.VBRIDGE_NAME,
+                                                   if_name=port_name)
+
+            in_port = iface["vinterface-status"]["mapped-port"]
+
             self._odl_client.create_ctrl_flow(node_id=node_id,
-                                              table_id=0,
-                                              flow_id=10,
-                                              in_port="??????",
-                                              priority=9)
+                                              flow_id=port_name,
+                                              in_port=in_port,
+                                              priority=self._odl_client.TRUNK_FLOW_PRIORITY)
