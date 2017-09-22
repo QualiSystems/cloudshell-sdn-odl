@@ -38,8 +38,15 @@ class GenericSDNResource(object):
 
         :rtype: str
         """
-        # return self.attributes.get("{}Console Port".format(self.namespace_prefix), None)
         return self.attributes.get("{}Port".format(self.namespace_prefix), None)
+
+    @property
+    def scheme(self):
+        """SDN Controller port
+
+        :rtype: str
+        """
+        return self.attributes.get("{}Scheme".format(self.namespace_prefix), None)
 
     @classmethod
     def from_context(cls, context, shell_name=None):

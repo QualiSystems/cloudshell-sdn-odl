@@ -38,8 +38,9 @@ class OpendaylightResourceDriver(ResourceDriverInterface, SDNResourceDriverInter
 
         odl_client = ODLClient(address=resource_config.address,
                                username=resource_config.user,
-                               port=int(resource_config.port),
-                               password=password)
+                               password=password,
+                               scheme=resource_config.scheme,
+                               port=int(resource_config.port))
 
         connectivity_runner = ODLConnectivityRunner(odl_client=odl_client,
                                                     logger=logger,
@@ -80,8 +81,9 @@ class OpendaylightResourceDriver(ResourceDriverInterface, SDNResourceDriverInter
 
         odl_client = ODLClient(address=resource_config.address,
                                username=resource_config.user,
-                               port=int(resource_config.port),
-                               password=password)
+                               password=password,
+                               scheme=resource_config.scheme,
+                               port=int(resource_config.port))
 
         add_remove_trunks_runner = ODLAddRemoveTrunksRunner(odl_client=odl_client,
                                                             logger=logger,
@@ -109,8 +111,9 @@ class OpendaylightResourceDriver(ResourceDriverInterface, SDNResourceDriverInter
 
         odl_client = ODLClient(address=resource_config.address,
                                username=resource_config.user,
-                               port=int(resource_config.port),
-                               password=password)
+                               password=password,
+                               scheme=resource_config.scheme,
+                               port=int(resource_config.port))
 
         add_remove_trunks_runner = ODLAddRemoveTrunksRunner(odl_client=odl_client,
                                                             logger=logger,
@@ -138,8 +141,9 @@ class OpendaylightResourceDriver(ResourceDriverInterface, SDNResourceDriverInter
 
         odl_client = ODLClient(address=resource_config.address,
                                username=resource_config.user,
-                               port=int(resource_config.port),
-                               password=password)
+                               password=password,
+                               scheme=resource_config.scheme,
+                               port=int(resource_config.port))
 
         autoload_operations = ODLAutoloadRunner(odl_client=odl_client,
                                                 logger=logger,
@@ -171,8 +175,9 @@ class OpendaylightResourceDriver(ResourceDriverInterface, SDNResourceDriverInter
 
         odl_client = ODLClient(address=resource_config.address,
                                username=resource_config.user,
-                               port=int(resource_config.port),
-                               password=password)
+                               password=password,
+                               scheme=resource_config.scheme,
+                               port=int(resource_config.port))
 
         autoload_operations = ODLRemoveOpenflowRunner(odl_client=odl_client,
                                                       logger=logger)

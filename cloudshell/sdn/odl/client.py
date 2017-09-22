@@ -12,18 +12,16 @@ class ODLClient(object):
     TRUNK_FLOW_PRIORITY = 9
     DEFAULT_FLOW_TABLE = 0
 
-    def __init__(self, address, username, password, port=8181):
+    def __init__(self, address, username, password, scheme="http", port=8181):
         """
 
         :param str address: controller address (Example: https://10.10.0.11 or 10.10.0.11)
         :param str username: controller username
         :param str password: controller password
+        :param str scheme: protocol (http|https)
         :param int port: controller port
         """
-        if "http" not in address:
-            address = "{}://{}".format("http", address)
-
-        self._base_url = "{}:{}".format(address, port)
+        self._base_url = "{}://{}:{}".format(scheme, address, port)
         self._auth = HTTPBasicAuth(username=username, password=password)
         self._headers = {"Content-Type": "application/json"}
 
