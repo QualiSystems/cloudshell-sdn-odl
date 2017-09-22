@@ -75,7 +75,7 @@ class ODLClient(object):
         raise_for_status and resp.raise_for_status()
         return resp
 
-    def _get_topology(self):
+    def get_topology(self):
         """Get network topology data
 
         :rtype: dict
@@ -90,7 +90,7 @@ class ODLClient(object):
         :rtype: nx.DiGraph
         """
         graph = nx.DiGraph()
-        topo = self._get_topology()
+        topo = self.get_topology()
 
         for node in topo.get("node", []):
             if 'opendaylight-topology-inventory:inventory-node-ref' in node:

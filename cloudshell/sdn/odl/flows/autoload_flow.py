@@ -7,8 +7,8 @@ class SDNODLController(GenericResource):
     RESOURCE_MODEL = "SDN ODL Controller"
 
 
-class OpenVSwitchChassis(GenericChassis):
-    RESOURCE_MODEL = "OpenVSwitch"
+# class OpenVSwitchChassis(GenericChassis):
+#     RESOURCE_MODEL = "OpenVSwitch"
 
 
 class ODLAutoloadFlow(object):
@@ -26,15 +26,15 @@ class ODLAutoloadFlow(object):
         self._resource_config = resource_config
         self._resources = []
         self._attributes = []
-        self._resource = SDNODLController(shell_name="",
-                                          shell_type="CS_Controller",
+        self._resource = SDNODLController(shell_name=self._resource_config.shell_name,
+                                          shell_type="CS_Switch",
                                           name="ODL Controller",
                                           unique_id="ODL Controller")
 
     def execute_flow(self):
         # ports used in connections between switches
         used_ports = []
-        topo = self._odl_client._get_topology()
+        topo = self._odl_client.get_topology()
         switch_ids = self._odl_client.get_switches()
 
         for link in topo.get("link", []):
@@ -46,12 +46,12 @@ class ODLAutoloadFlow(object):
 
         for switch_id in self._odl_client.get_leaf_switches():
             sw_unique_id = switch_id.split(":")[-1]
-            sw_resource = OpenVSwitchChassis(shell_name="",
-                                             name=switch_id.replace("openflow:", "openflow_"),
-                                             unique_id=sw_unique_id)
+            sw_resource = GenericChassis(shell_name=self._resource_config.shell_name,
+                                         name=switch_id.replace("openflow:", "openflow_"),
+                                         unique_id=sw_unique_id)
 
-            switch = self._odl_client.get_switch(switch_id)
             self._resource.add_sub_resource(sw_unique_id, sw_resource)
+            switch = self._odl_client.get_switch(switch_id)
 
             for port in [port for port in switch["node-connector"]
                          if port["id"] not in used_ports
@@ -72,7 +72,7 @@ class ODLAutoloadFlow(object):
                 mac_addr = port.get("flow-node-inventory:hardware-address")
                 unique_id = "{}.{}".format(sw_unique_id, port_no)
 
-                port_object = GenericPort(shell_name="",
+                port_object = GenericPort(shell_name=self._resource_config.shell_name,
                                           name=port_name.replace(":", "-"),
                                           unique_id=unique_id)
 
