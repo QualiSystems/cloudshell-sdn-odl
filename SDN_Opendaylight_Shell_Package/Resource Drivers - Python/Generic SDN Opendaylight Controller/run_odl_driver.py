@@ -80,6 +80,8 @@ request = """{"driverRequest": {"actions": [{"connectionId": "09faa654-9189-4b99
 
 
 address = 'localhost'
+address = '192.168.85.17'
+
 # address = 'http://172.29.128.17'
 # address = '192.168.73.20'
 # address = '192.168.73.56'
@@ -146,9 +148,10 @@ if __name__ == '__main__':
         # driver.add_trunk_ports(context=context, ports="openflow:1::s1-eth5;openflow:1::s1-eth6")
         # driver.add_trunk_ports(context=context, ports="openflow:1::s1-eth6")
 
-        # todo: CS_TRUNKS - VTN add disabled flag for 0 VLAN !
-        #
-        driver.remove_trunk_ports(context=context, ports="openflow:1::s1-eth5;")
+        # driver.remove_trunk_ports(context=context, ports="openflow:1::s1-eth5;")
+        # driver.remove_trunk_ports(context=context, ports="openflow:1::s1-eth5;openflow:1::s1-eth6;")
+
+        # driver.remove_trunk_ports(context=context, ports="openflow:1::s1-eth5;openflow:1::s1-eth6;")
 
         # driver.ApplyConnectivityChanges(context=context, request=request)
         # print(inv)
@@ -157,5 +160,6 @@ if __name__ == '__main__':
         # out = driver.load_firmware(context, 'dsadas', None)
         # out = driver.get_inventory(context)
         # out = driver.ApplyConnectivityChanges(context, request)
-
+        for xx in out.resources:
+            print xx.__dict__
         print(out)

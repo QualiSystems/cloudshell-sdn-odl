@@ -10,9 +10,10 @@ xmlns="http://schemas.qualisystems.com/ResourceManagement/ShellsConfigurationSch
             <Description>Discovers the device structure and populate its attributes.</Description>
         </AutoLoad>
         <Attributes>
+            <Attribute Name="Scheme" Value="http" />
+            <Attribute Name="Port" Value="8181" />
 			<Attribute Name="User" Value="" />
 			<Attribute Name="Password" Value="" />
-            <Attribute Name="Port" Value="8181" />
         </Attributes>
     </ResourceTemplate>
 
