@@ -16,6 +16,17 @@ class GenericSDNResource(object):
         else:
             self.namespace_prefix = ""
 
+    def _parse_ports(self, ports):
+        """Parse ports string into the list
+
+        :param str ports:
+        :rtype: list[tuple[str, str]]
+        """
+        if not ports:
+            return []
+
+        return [tuple(port_pair.split("::")) for port_pair in ports.strip(";").split(";")]
+
     @property
     def user(self):
         """SDN Controller user
@@ -48,6 +59,24 @@ class GenericSDNResource(object):
         """
         return self.attributes.get("{}Scheme".format(self.namespace_prefix), None)
 
+    @property
+    def add_trunk_ports(self):
+        """SDN Controller port
+
+        :rtype: str
+        """
+        ports = self.attributes.get("{}Trunk Ports".format(self.namespace_prefix), None)
+        return self._parse_ports(ports=ports)
+
+    @property
+    def remove_trunk_ports(self):
+        """SDN Controller port
+
+        :rtype: str
+        """
+        ports = self.attributes.get("{}Remove Trunk Ports".format(self.namespace_prefix), None)
+        return self._parse_ports(ports=ports)
+
     @classmethod
     def from_context(cls, context, shell_name=None):
         """Create an instance of SDN Resource from the given context
@@ -61,5 +90,4 @@ class GenericSDNResource(object):
                      name=context.resource.name)
 
         result.attributes = context.resource.attributes.copy()
-
         return result

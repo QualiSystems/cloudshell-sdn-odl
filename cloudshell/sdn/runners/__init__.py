@@ -1,4 +1,3 @@
 from autoload_runner import SDNAutoloadRunner
-from add_remove_trunks_runner import SDNAddRemoveTrunksRunner
 from connectivity_runner import SDNConnectivityRunner
 from remove_openflow_runner import SDNRemoveOpenflowRunner

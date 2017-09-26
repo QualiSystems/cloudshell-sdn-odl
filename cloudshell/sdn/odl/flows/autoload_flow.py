@@ -7,10 +7,6 @@ class SDNODLController(GenericResource):
     RESOURCE_MODEL = "SDN ODL Controller"
 
 
-# class OpenVSwitchChassis(GenericChassis):
-#     RESOURCE_MODEL = "OpenVSwitch"
-
-
 class ODLAutoloadFlow(object):
     def __init__(self, odl_client, logger, api, resource_config):
         """
@@ -31,11 +27,29 @@ class ODLAutoloadFlow(object):
                                           name="ODL Controller",
                                           unique_id="ODL Controller")
 
+    def _create_trunks_vtn(self):
+        """
+
+        :return:
+        """
+        self._odl_client.create_vtn(tenant_name=self._odl_client.VTN_TRUNKS_NAME)
+        self._odl_client.create_vbridge(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
+                                        bridge_name=self._odl_client.VBRIDGE_NAME)
+
+    def _convert_port_name(self, switch_id, port_name):
+        """
+
+        :return:
+        """
+        return "{}_{}".format(switch_id, port_name).replace("-", "_").replace(":", "_")
+
     def execute_flow(self):
         # ports used in connections between switches
         used_ports = []
         topo = self._odl_client.get_topology()
         switch_ids = self._odl_client.get_switches()
+
+        self._create_trunks_vtn()
 
         for link in topo.get("link", []):
             tp = link["destination"]["dest-node"]
@@ -88,8 +102,35 @@ class ODLAutoloadFlow(object):
                 port_object.adjacent = ""
                 sw_resource.add_sub_resource(port_no, port_object)
 
+                if (switch_id, port_name) in self._resource_config.add_trunk_ports:
+                    if_name = self._convert_port_name(switch_id=switch_id, port_name=port_name)
+
+                    self._odl_client.create_interface(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
+                                                      bridge_name=self._odl_client.VBRIDGE_NAME,
+                                                      if_name=if_name)
+
+                    self._odl_client.map_port_to_interface(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
+                                                           bridge_name=self._odl_client.VBRIDGE_NAME,
+                                                           if_name=if_name,
+                                                           node_id=switch_id,
+                                                           phys_port_name=port_name)
+
+                    self._odl_client.create_ctrl_flow(node_id=switch_id,
+                                                      flow_id=if_name,
+                                                      in_port=port["id"],
+                                                      priority=self._odl_client.TRUNK_FLOW_PRIORITY)
+
+                elif (switch_id, port_name) in self._resource_config.remove_trunk_ports:
+                    if_name = self._convert_port_name(switch_id=switch_id, port_name=port_name)
+
+                    self._odl_client.delete_interface_from_all_vbridges(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
+                                                                        if_name=if_name)
+
+                    self._odl_client.delete_ctrl_flow(node_id=switch_id, flow_id=if_name, raise_for_status=False)
+
         result = AutoloadDetailsBuilder(self._resource).autoload_details()
         self._log_autoload_details(result)
+
         return result
 
     def _log_autoload_details(self, autoload_details):
