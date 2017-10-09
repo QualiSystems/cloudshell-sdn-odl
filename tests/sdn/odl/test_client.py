@@ -7,5 +7,5 @@ class TestODLClient(unittest.TestCase):
     def setUp(self):
         self.client = ODLClient(address="127.0.0.1", username="admin", password="admin", scheme="http", port=8181)
 
-    def test_empty(self):
-        pass
+    def test_do_get(self):
+        self.client._do_get(path, raise_for_status=True, **kwargs)

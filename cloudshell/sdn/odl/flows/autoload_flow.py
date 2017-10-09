@@ -1,10 +1,7 @@
 from cloudshell.devices.autoload.autoload_builder import AutoloadDetailsBuilder
-from cloudshell.devices.standards.networking.autoload_structure import GenericResource, GenericChassis
-from cloudshell.devices.standards.networking.autoload_structure import GenericPort
-
-
-class SDNODLController(GenericResource):
-    RESOURCE_MODEL = "SDN ODL Controller"
+from cloudshell.devices.standards.sdn.autoload_structure import SDNControllerResource
+from cloudshell.devices.standards.sdn.autoload_structure import GenericSDNSwitch
+from cloudshell.devices.standards.sdn.autoload_structure import GenericSDNPort
 
 
 class ODLAutoloadFlow(object):
@@ -22,10 +19,9 @@ class ODLAutoloadFlow(object):
         self._resource_config = resource_config
         self._resources = []
         self._attributes = []
-        self._resource = SDNODLController(shell_name=self._resource_config.shell_name,
-                                          shell_type="CS_Switch",
-                                          name="ODL Controller",
-                                          unique_id="ODL Controller")
+        self._resource = SDNControllerResource(shell_name=self._resource_config.shell_name,
+                                               name="ODL Controller",
+                                               unique_id="ODL Controller")  # todo: use resource_name here !!!
 
     def _create_trunks_vtn(self):
         """
@@ -60,9 +56,9 @@ class ODLAutoloadFlow(object):
 
         for switch_id in self._odl_client.get_leaf_switches():
             sw_unique_id = switch_id.split(":")[-1]
-            sw_resource = GenericChassis(shell_name=self._resource_config.shell_name,
-                                         name=switch_id.replace("openflow:", "openflow_"),
-                                         unique_id=sw_unique_id)
+            sw_resource = GenericSDNSwitch(shell_name=self._resource_config.shell_name,
+                                           name=switch_id.replace("openflow:", "openflow_"),
+                                           unique_id=sw_unique_id)
 
             self._resource.add_sub_resource(sw_unique_id, sw_resource)
             switch = self._odl_client.get_switch(switch_id)
@@ -86,9 +82,9 @@ class ODLAutoloadFlow(object):
                 mac_addr = port.get("flow-node-inventory:hardware-address")
                 unique_id = "{}.{}".format(sw_unique_id, port_no)
 
-                port_object = GenericPort(shell_name=self._resource_config.shell_name,
-                                          name=port_name.replace(":", "-"),
-                                          unique_id=unique_id)
+                port_object = GenericSDNPort(shell_name=self._resource_config.shell_name,
+                                             name=port_name.replace(":", "-"),
+                                             unique_id=unique_id)
 
                 port_object.port_description = ""
                 port_object.l2_protocol_type = ""
