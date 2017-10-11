@@ -87,14 +87,9 @@ class ODLAutoloadFlow(object):
                                              unique_id=unique_id)
 
                 port_object.port_description = ""
-                port_object.l2_protocol_type = ""
                 port_object.mac_address = mac_addr
-                port_object.mtu = 0
-                port_object.bandwidth = 0
                 port_object.ipv4_address = ""
                 port_object.ipv6_address = ""
-                port_object.duplex = ""
-                port_object.auto_negotiation = ""
                 port_object.adjacent = ""
                 sw_resource.add_sub_resource(port_no, port_object)
 
