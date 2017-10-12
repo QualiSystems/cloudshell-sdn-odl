@@ -29,3 +29,12 @@ class ODLConnectivityRunner(SDNConnectivityRunner):
         :rtype: ODLRemoveConnectivityFlow
         """
         return ODLRemoveConnectivityFlow(odl_client=self._odl_client, logger=self._logger)
+
+    def _parse_switch(self, full_name):
+        """Parse switch name from the resource full name
+
+        :param str full_name:
+        :rtype: str
+        """
+        switch_id = super(ODLConnectivityRunner, self)._parse_port(full_name)
+        return switch_id.replace("openflow_", "openflow:")

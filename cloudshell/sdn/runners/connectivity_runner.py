@@ -51,11 +51,7 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
         :param str full_name:
         :rtype: str
         """
-        switch_id = full_name.split("/")[-2]
-        # todo: move ":" symbol replacing to one place
-        # TODO: MOVE it to ODL module !!!
-        switch_id = switch_id.replace("openflow_", "openflow:")
-        return switch_id
+        return full_name.split("/")[-2]
 
     def _get_vlan_list(self, vlan_str):
         """Get VLAN list from the input string
