@@ -9,7 +9,7 @@ class ODLConnectivityRunner(SDNConnectivityRunner):
 
         :param cloudshell.sdn.odl.client.ODLClient odl_client:
         :param logging.Logger logger:
-        :param resource_config: cloudshell.sdn.config_attrs_structure.GenericSDNResource
+        :param cloudshell.devices.standards.sdn.configuration_attributes_structure.GenericSDNResource resource_config:
         """
         super(ODLConnectivityRunner, self).__init__(logger, resource_config)
         self._odl_client = odl_client

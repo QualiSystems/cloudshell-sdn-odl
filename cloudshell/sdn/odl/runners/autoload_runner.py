@@ -9,7 +9,7 @@ class ODLAutoloadRunner(SDNAutoloadRunner):
         :param cloudshell.sdn.odl.client.ODLClient odl_client:
         :param logging.Logger logger:
         :param cloudshell.api.cloudshell_api.CloudShellAPISession api:
-        :param resource_config: cloudshell.sdn.config_attrs_structure.GenericSDNResource
+        :param cloudshell.devices.standards.sdn.configuration_attributes_structure.GenericSDNResource resource_config:
         """
         super(ODLAutoloadRunner, self).__init__(logger, api, resource_config)
         self._odl_client = odl_client

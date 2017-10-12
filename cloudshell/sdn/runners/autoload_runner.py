@@ -10,7 +10,7 @@ class SDNAutoloadRunner(object):
 
         :param logging.Logger logger:
         :param cloudshell.api.cloudshell_api.CloudShellAPISession api:
-        :param resource_config: cloudshell.sdn.config_attrs_structure.GenericSDNResource
+        :param cloudshell.devices.standards.sdn.configuration_attributes_structure.GenericSDNResource resource_config:
         """
         self._logger = logger
         self._api = api
