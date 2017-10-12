@@ -20,8 +20,8 @@ class ODLAutoloadFlow(object):
         self._resources = []
         self._attributes = []
         self._resource = SDNControllerResource(shell_name=self._resource_config.shell_name,
-                                               name="ODL Controller",
-                                               unique_id="ODL Controller")  # todo: use resource_name here !!!
+                                               name=self._resource_config.name,
+                                               unique_id=self._resource_config.fullname)
 
     def _create_trunks_vtn(self):
         """
