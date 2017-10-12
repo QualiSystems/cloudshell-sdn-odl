@@ -1,3 +1,6 @@
+from cloudshell.sdn.odl import converter
+
+
 class ODLRemoveConnectivityFlow(object):
     def __init__(self, odl_client, logger):
         """
@@ -18,7 +21,7 @@ class ODLRemoveConnectivityFlow(object):
         tenant_name = "{}{}".format(self._odl_client.VTN_NAME_PREFIX, vlan_id)
 
         for node_id, interface in ports:
-            interface = "{}_{}".format(node_id, interface).replace("-", "_").replace(":", "_")
+            interface = converter.get_vtn_interface_name(node_id, interface)
             self._odl_client.delete_interface(tenant_name=tenant_name,
                                               bridge_name=self._odl_client.VBRIDGE_NAME,
                                               if_name=interface)
