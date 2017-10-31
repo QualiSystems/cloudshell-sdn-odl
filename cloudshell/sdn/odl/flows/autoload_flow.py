@@ -89,7 +89,7 @@ class ODLAutoloadFlow(object):
                 sw_resource.add_sub_resource(port_no, port_object)
 
                 if (switch_id, port_name) in self._resource_config.add_trunk_ports:
-                    if_name = converter.get_vtn_interface_name(switch_id=switch_id, port_name=port_name)
+                    if_name = converter.prepare_vtn_interface_name(switch_id=switch_id, port_name=port_name)
 
                     self._odl_client.create_interface(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
                                                       bridge_name=self._odl_client.VBRIDGE_NAME,
@@ -107,7 +107,7 @@ class ODLAutoloadFlow(object):
                                                       priority=self._odl_client.TRUNK_FLOW_PRIORITY)
 
                 elif (switch_id, port_name) in self._resource_config.remove_trunk_ports:
-                    if_name = converter.get_vtn_interface_name(switch_id=switch_id, port_name=port_name)
+                    if_name = converter.prepare_vtn_interface_name(switch_id=switch_id, port_name=port_name)
 
                     self._odl_client.delete_interface_from_all_vbridges(tenant_name=self._odl_client.VTN_TRUNKS_NAME,
                                                                         if_name=if_name)

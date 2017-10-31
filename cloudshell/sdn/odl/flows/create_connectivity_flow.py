@@ -21,7 +21,7 @@ class ODLCreateConnectivityFlow(object):
         """
         for node_id, interface in ports:
             phys_port_name = interface
-            interface = converter.get_vtn_interface_name(node_id, interface)
+            interface = converter.prepare_vtn_interface_name(node_id, interface)
 
             self._odl_client.create_interface(tenant_name=tenant_name,
                                               bridge_name=self._odl_client.VBRIDGE_NAME,
