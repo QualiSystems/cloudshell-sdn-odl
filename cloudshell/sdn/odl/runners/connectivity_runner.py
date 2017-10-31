@@ -36,5 +36,5 @@ class ODLConnectivityRunner(SDNConnectivityRunner):
         :param str full_name:
         :rtype: str
         """
-        switch_id = super(ODLConnectivityRunner, self)._parse_port(full_name)
+        switch_id = super(ODLConnectivityRunner, self)._parse_switch(full_name)
         return switch_id.replace("openflow_", "openflow:")
