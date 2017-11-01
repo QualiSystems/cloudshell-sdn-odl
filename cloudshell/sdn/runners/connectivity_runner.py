@@ -43,7 +43,8 @@ class SDNConnectivityRunner(ConnectivityOperationsInterface):
         :param str full_name:
         :rtype: str
         """
-        return full_name.split("/")[-1]
+        port_name = full_name.split("/")[-1]
+        return port_name.replace("_", "/")
 
     def _parse_switch(self, full_name):
         """Parse switch name from the resource full name

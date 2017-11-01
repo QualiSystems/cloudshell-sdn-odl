@@ -64,9 +64,11 @@ class ODLAutoloadFlow(object):
                          and "local" not in port["id"].lower()]:
 
                 try:
-                    port_name = port["flow-node-inventory:name"].replace("/", "-")
+                    port_name = port["flow-node-inventory:name"]
                 except KeyError:
-                    port_name = port["id"].replace("/", "-")
+                    port_name = port["id"]
+
+                port_name = port_name.replace("/", "_")
 
                 try:
                     port_no = port["flow-node-inventory:port-number"]
