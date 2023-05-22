@@ -1,4 +1,4 @@
 cloudshell-networking-devices>=2.2,<2.3
 cloudshell-networking>=5.0,<5.1
-requests==2.20.0
+requests==2.31.0
 networkx==1.11
